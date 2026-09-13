@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{seo.title}}</title>
+<meta name="description" content="{{seo.description}}" />
+<meta name="theme-color" content="#0b0e14" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%237ef0c4'/%3E%3Ctext x='32' y='43' font-family='Arial,sans-serif' font-size='28' font-weight='800' text-anchor='middle' fill='%230b0e14'%3E{{site.initials}}%3C/text%3E%3C/svg%3E" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="{{site.url}}/" />
+<meta property="og:title" content="{{seo.ogTitle}}" />
+<meta property="og:description" content="{{seo.ogDescription}}" />
+<meta property="og:image" content="{{site.url}}/{{site.photo}}" />
+<meta property="og:image:secure_url" content="{{site.url}}/{{site.photo}}" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:alt" content="{{seo.ogImageAlt}}" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{seo.ogTitle}}" />
+<meta name="twitter:description" content="{{seo.ogDescription}}" />
+<meta name="twitter:image" content="{{site.url}}/{{site.photo}}" />
+<link rel="canonical" href="{{site.url}}/" />
+<link rel="stylesheet" href="styles.css?v={{site.assetVersion}}" />
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="nav" id="top">
+<div class="container nav-inner">
+<a class="brand" href="#top"><span class="brand-mark">{{site.initials}}</span><span>{{profile.name}}</span></a>
+<button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Menu">Menu</button>
+<nav class="nav-links" id="navLinks">
+{{#each nav}}<a href="#{{id}}">{{label}}</a>{{/each}}
+<a class="btn btn-small" href="{{site.cv}}" download>Download CV</a>
+</nav>
+</div>
+</header>
+<main id="main">
+<section class="hero">
+<div class="container hero-grid">
+<div class="reveal">
+<p class="eyebrow">{{profile.eyebrow}}</p>
+<h1>{{{profile.heroHtml}}}</h1>
+<p class="lede">{{{profile.heroLedeHtml}}}</p>
+<div class="hero-cta">
+<a class="btn btn-primary" href="{{profile.heroPrimaryHref}}">{{profile.heroPrimaryLabel}}</a>
+<a class="btn btn-ghost contact-btn" href="{{site.cv}}" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> {{profile.cvCtaLabel}}</a>
+</div>
+{{#if profile.heroNoteHtml}}<p class="hero-note">{{{profile.heroNoteHtml}}}</p>{{/if}}
+{{#if profile.contactButtons}}
+<div class="hero-contact-btns">
+{{#each profile.contactButtons}}<a class="btn btn-small btn-{{style}} contact-btn" href="{{href}}"{{#if newTab}} target="_blank" rel="noopener"{{/if}}>{{{icon}}} {{label}}</a>{{/each}}
+</div>
+{{/if}}
+<p class="hero-loc">{{profile.location}}</p>
+</div>
+<aside class="hero-card reveal">
+<div class="hero-card-top">
+<div class="avatar avatar-photo"><span aria-hidden="true">{{site.initials}}</span><img src="{{site.photo}}" alt="{{profile.name}}" loading="lazy" onerror="this.remove()" /></div>
+<div><p class="hero-card-name">{{profile.name}}</p><p class="hero-card-role">{{profile.role}}</p></div>
+</div>
+<div class="hero-stats">
+{{#each profile.stats}}<div><span data-count="{{value}}"{{#if suffix}} data-suffix="{{suffix}}"{{/if}}>{{value}}{{suffix}}</span><small>{{label}}</small></div>{{/each}}
+</div>
+<div class="hero-tags">{{#each profile.tags}}<span>{{.}}</span>{{/each}}</div>
+</aside>
+</div>
+</section>
+{{#if experience}}
+<section class="section section-alt" id="experience">
+<div class="container">
+<p class="eyebrow reveal">{{experience.eyebrow}}</p>
+<h2 class="reveal">{{experience.heading}}</h2>
+<div class="timeline">
+{{#each experience.jobs}}
+<article class="job reveal">
+<div class="job-head"><div><h3>{{role}} - {{company}}{{#if industry}} ({{industry}}){{/if}}</h3><p class="job-sub">{{location}} - {{dates}}</p></div><span class="{{badgeClass}}">{{badge}}</span></div>
+<p class="job-highlight">{{highlight}}</p>
+<ul>
+{{#each bullets}}<li>{{.}}</li>{{/each}}
+</ul>
+</article>
+{{/each}}
+</div>
+</div>
+</section>
+{{/if}}
+{{#if caseStudies}}
+<section class="section" id="work">
+<div class="container">
+<p class="eyebrow reveal">{{caseStudies.eyebrow}}</p>
+<h2 class="reveal">{{caseStudies.heading}}</h2>
+<p class="lede reveal">{{caseStudies.intro}}</p>
+<div class="case-grid">
+{{#each caseStudies.items}}
+<article class="case reveal">
+<div class="case-top"><p class="work-kicker">{{kicker}}</p><p class="work-outcome">{{outcome}}</p></div>
+<h3>{{title}}</h3>
+<ul class="case-list">
+{{#each details}}<li><strong>{{label}}:</strong> {{text}}</li>{{/each}}
+</ul>
+<div class="work-tags">{{#each tags}}<span>{{.}}</span>{{/each}}</div>
+</article>
+{{/each}}
+</div>
+</div>
+</section>
+{{/if}}
+{{#if skills}}
+<section class="section" id="skills">
+<div class="container">
+<p class="eyebrow reveal">{{skills.eyebrow}}</p>
+<h2 class="reveal">{{skills.heading}}</h2>
+<p class="lede reveal">{{skills.intro}}</p>
+<div class="skills-grid">
+{{#each skills.items}}
+<article class="skill reveal skill-card" data-modal="m-{{id}}"><p class="work-kicker">{{kicker}}</p><h3>{{title}}</h3><p>{{{description}}}</p><p class="skill-more">{{more}}</p></article>
+{{/each}}
+</div>
+</div>
+</section>
+{{/if}}
+{{#if teardowns}}
+<section class="section section-alt" id="teardowns">
+<div class="container">
+<p class="eyebrow reveal">{{teardowns.eyebrow}}</p>
+<h2 class="reveal">{{teardowns.heading}}</h2>
+<p class="lede reveal">{{teardowns.intro}}</p>
+<div class="teardown-grid">
+{{#each teardowns.cards}}
+<article class="td-card reveal td-open" data-modal="m-{{id}}" role="button" tabindex="0">
+<span class="td-hint">{{hint}}</span>
+<h3>{{title}}</h3>
+{{#each paragraphs}}<p>{{{.}}}</p>{{/each}}
+{{#if ordered}}<ol class="td-list">{{#each ordered}}<li><strong>{{lead}}</strong> {{#if meta}}({{meta}}) {{/if}}{{text}} <em>{{note}}</em></li>{{/each}}</ol>{{/if}}
+</article>
+{{/each}}
+</div>
+<p class="lede reveal">{{{teardowns.outroHtml}}}</p>
+</div>
+</section>
+{{/if}}
+{{#if builds}}
+<section class="section" id="builds">
+<div class="container">
+<p class="eyebrow reveal">{{builds.eyebrow}}</p>
+<h2 class="reveal">{{builds.heading}}</h2>
+<p class="lede reveal">{{builds.intro}}</p>
+<div class="build-grid">
+{{#each builds.cards}}
+<article class="build-card reveal">
+<p class="work-kicker">{{kicker}}</p>
+<h3>{{title}}</h3>
+{{#each paragraphs}}<p>{{{.}}}</p>{{/each}}
+{{#if steps}}<ol class="td-list">{{#each steps}}<li><strong>{{lead}}:</strong> {{text}}</li>{{/each}}</ol>{{/if}}
+{{#if tags}}<div class="work-tags">{{#each tags}}<span>{{.}}</span>{{/each}}</div>{{/if}}
+</article>
+{{/each}}
+</div>
+</div>
+</section>
+{{/if}}
+{{#if education}}
+<section class="section section-alt" id="education">
+<div class="container edu-grid">
+<div class="reveal">
+<p class="eyebrow">{{education.eyebrow}}</p>
+<h2>{{education.heading}}</h2>
+{{#each education.degrees}}<article class="job"><h3>{{degree}}</h3><p class="job-sub">{{detail}}</p></article>{{/each}}
+</div>
+{{#if education.certs}}
+<div class="reveal">
+<p class="eyebrow">{{education.certsEyebrow}}</p>
+<h2>{{education.certsHeading}}</h2>
+<ul class="certs">
+{{#each education.certs}}<li><strong>{{name}}</strong><span>{{year}}</span></li>{{/each}}
+</ul>
+</div>
+{{/if}}
+</div>
+</section>
+{{/if}}
+{{#if contact}}
+<section class="section contact" id="contact">
+<div class="container contact-inner reveal">
+<p class="eyebrow">{{contact.eyebrow}}</p>
+<h2>{{contact.heading}}</h2>
+<p class="lede">{{contact.lede}}</p>
+<div class="hero-cta">
+<a class="btn btn-small btn-email contact-btn" href="mailto:{{contact.email}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6L22 7"/></svg> {{contact.emailLabel}}</a>
+<a class="btn btn-small btn-linkedin contact-btn" href="{{contact.linkedin}}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg> LinkedIn</a>
+<a class="btn btn-small btn-ghost contact-btn" href="{{site.cv}}" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg> {{contact.cvLabel}}</a>
+</div>
+<p class="contact-line">{{contact.line}}</p>
+</div>
+</section>
+{{/if}}
+</main>
+<footer class="footer"><div class="container footer-inner"><span>{{footer.text}}</span><span>© <span id="year">2026</span></span></div></footer>
+{{#each skills.items}}{{#if modal}}
+<div class="modal" id="m-{{id}}" aria-hidden="true"><div class="modal-back" data-close></div><div class="modal-card" role="dialog" aria-modal="true">
+<button class="modal-x" data-close type="button">Close</button>
+<p class="work-kicker">Toolkit deep dive</p><h3>{{modal.title}}</h3>
+<p>{{{modal.intro}}}</p>
+<ol class="td-list">{{#each modal.steps}}<li><strong>{{lead}}:</strong> {{text}}</li>{{/each}}</ol>
+{{#if modal.result}}<p><strong>Result:</strong> {{{modal.result}}}</p>{{/if}}
+</div></div>
+{{/if}}{{/each}}
+{{#each teardowns.modals}}
+<div class="modal" id="m-{{id}}" aria-hidden="true"><div class="modal-back" data-close></div><div class="modal-card" role="dialog" aria-modal="true">
+<button class="modal-x" data-close type="button">Close</button>
+<p class="work-kicker">Full teardown</p><h3>{{title}}</h3>
+{{#each paragraphs}}<p>{{{.}}}</p>{{/each}}
+{{#if steps}}<ol class="td-list">{{#each steps}}<li><strong>{{lead}}</strong> {{#if meta}}({{meta}}) {{/if}}{{text}} <em>{{note}}</em></li>{{/each}}</ol>{{/if}}
+</div></div>
+{{/each}}
+<script src="script.js?v={{site.assetVersion}}" defer></script>
+</body>
+</html>
+

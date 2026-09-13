@@ -1,0 +1,151 @@
+# profile.json schema
+
+Every field the template understands. Optional top-level sections are omitted entirely when not needed — the build never emits empty sections. Fields ending in `Html` accept limited inline tags (`<strong>`, `<em>`, `<a href="#anchor">`); everything else is HTML-escaped automatically.
+
+## Top-level
+
+| Key | Required | Purpose |
+|---|---|---|
+| `site` | ✔ | URLs, filenames, initials, asset cache-buster |
+| `seo` | ✔ | `<title>`, meta description, Open Graph / Twitter card text |
+| `profile` | ✔ | Hero: name, positioning, headline stats, tags |
+| `nav` | ✔ | Section links shown in the sticky header |
+| `experience` | recommend | Career timeline |
+| `caseStudies` | recommend | 3–6 project cards (Problem/Research/Solution/Impact) |
+| `skills` | optional | Capability cards with optional tap-to-open modals |
+| `teardowns` | optional | Product-teardown cards (product judgment signal) |
+| `builds` | optional | Side projects / things built |
+| `education` | optional | Degrees + certifications |
+| `contact` | ✔ | Email / LinkedIn buttons and footer line |
+| `footer` | ✔ | Footer text |
+
+## `site`
+
+```json
+{
+  "url": "https://yourname.pages.dev",
+  "assetVersion": "1",
+  "initials": "JD",
+  "photo": "profile.jpg",
+  "cv": "Your_CV.pdf"
+}
+```
+`url` — no trailing slash; used for canonical + og:url. `assetVersion` — bump to bust browser caches after changing styles/copy. `photo`/`cv` are filenames inside `assets/`.
+
+## `seo`
+
+```json
+{
+  "title": "Jane Doe - Product Manager, Fintech",
+  "description": "≤155 chars, the pitch for search results",
+  "ogTitle": "share-card title",
+  "ogDescription": "share-card description",
+  "ogImageAlt": "alt text for the share image"
+}
+```
+
+## `profile`
+
+```json
+{
+  "name": "Jane Doe",
+  "eyebrow": "Product Manager - Fintech - Payments",
+  "heroHtml": "I ship payment products people <em>trust</em>.",
+  "heroLedeHtml": "One or two sentences with your strongest <strong>verifiable numbers</strong>.",
+  "heroPrimaryLabel": "See my work",
+  "heroPrimaryHref": "#work",
+  "cvCtaLabel": "Download CV",
+  "role": "PM, Payments @ PayLoop",
+  "location": "London, UK - Hybrid",
+  "stats": [
+    { "value": "6", "suffix": "", "label": "years in fintech" },
+    { "value": "1.2", "suffix": "M", "label": "users served" }
+  ],
+  "tags": ["3-8 recruiter-searchable keywords"]
+}
+```
+
+## `experience.jobs[]`
+
+```json
+{
+  "role": "Product Manager, Payments",
+  "company": "PayLoop",
+  "industry": "Fintech",
+  "location": "London, UK",
+  "dates": "2021 - Present",
+  "badge": "1.2M users",
+  "badgeClass": "pill",
+  "highlight": "One line, strongest verifiable claim",
+  "bullets": ["Outcome-led sentences. Most should contain a number."]
+}
+```
+Order: reverse-chronological. `badgeClass`: `"pill"` (blue) for the current role, `"pill pill-green"` (green) for metric badges.
+
+## `caseStudies.items[]`
+
+```json
+{
+  "kicker": "Company, area, dates",
+  "outcome": "The number, short",
+  "title": "Project name",
+  "details": [
+    { "label": "Problem",  "text": "…" },
+    { "label": "Research", "text": "…" },
+    { "label": "Solution", "text": "…" },
+    { "label": "Impact",   "text": "…must contain a number…" }
+  ],
+  "tags": ["3-5 keywords used in the text"]
+}
+```
+
+## `skills.items[]`
+
+```json
+{
+  "id": "unique-slug",
+  "kicker": "Small label above the title",
+  "title": "Skill name",
+  "description": "How you actually use it, with one proof point.",
+  "more": "Tap to see … +",
+  "modal": {
+    "title": "Skill name: the method",
+    "intro": "2-3 sentences of context",
+    "steps": [ { "lead": "Step", "text": "what it means" } ],
+    "result": "optional closing proof point"
+  }
+}
+```
+`modal` is optional — omit it and no popup is generated (see Jane's fixture).
+
+## `teardowns` (optional)
+
+`eyebrow`, `heading`, `intro`, then `cards[]` with `{ id, hint, title, paragraphs[] }` or `{ id, hint, title, ordered[] }` where `ordered[]` items are `{ lead, meta?, text, note? }`. Plus `outroHtml` and `modals[]` (`{ id, title, paragraphs[] }`, optionally `steps[]`) — modal `id` must match the card `id`.
+
+## `builds` (optional)
+
+`eyebrow`, `heading`, `intro`, then `cards[]` with `{ kicker, title, paragraphs[] }` plus optional `steps[]` (`{ lead, text }`) and `tags[]`.
+
+## `education` (optional)
+
+`eyebrow`, `heading`, `degrees[]` (`{ degree, detail }`), optional `certsEyebrow`, `certsHeading`, `certs[]` (`{ name, year }`).
+
+## `contact` / `footer`
+
+```json
+{
+  "eyebrow": "Open to what's next",
+  "heading": "Let's build …",
+  "lede": "One line on what roles/location you want.",
+  "email": "you@example.com",
+  "emailLabel": "Email Me",
+  "linkedin": "https://linkedin.com/in/you",
+  "cvLabel": "CV",
+  "line": "you@example.com - +44… - City, note"
+}
+```
+`footer`: `{ "text": "Your Name, Role" }`.
+
+## `nav[]`
+
+`{ "id": "experience", "label": "Experience" }` — `id` must match a section key that exists; the CV button is appended automatically.

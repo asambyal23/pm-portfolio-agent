@@ -1,0 +1,24 @@
+{
+  "name": "pm-portfolio-agent",
+  "version": "1.0.0",
+  "description": "An AI-agent-ready Product Manager portfolio: edit one JSON file (or let an AI agent do it), run one command, push to GitHub, and Cloudflare Pages deploys it automatically.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "generate": "node build.mjs",
+    "validate": "node build.mjs --dry",
+    "dev": "node build.mjs && node serve.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "product-manager",
+    "portfolio",
+    "portfolio-template",
+    "ai-agent",
+    "cloudflare-pages",
+    "github-actions"
+  ],
+  "license": "MIT"
+}

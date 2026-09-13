@@ -1,0 +1,720 @@
+{
+  "_readme": "Copy this file to profile.json in the repo root and replace every value with your own. The AI agent (see SKILL.md) can build this file for you from your resume. Fields ending in Html allow inline tags like <strong> and <em> — everything else is escaped automatically.",
+  "site": {
+    "url": "https://ankush-kumar.pages.dev",
+    "assetVersion": "9",
+    "initials": "AK",
+    "photo": "profile.jpg",
+    "cv": "Ankush_Kumar_CV.pdf"
+  },
+  "seo": {
+    "title": "Ankush Kumar - Senior Product Manager, AI Platforms",
+    "description": "Senior PM, 12 years B2B SaaS. AI agents, platform strategy, discovery to launch. 0→40+ enterprise customers, launch cycles 14→5 weeks, $2M unlocked.",
+    "ogTitle": "Ankush Kumar - Senior Product Manager, AI Platforms",
+    "ogDescription": "12 years B2B SaaS. AI agents, platform strategy, discovery to launch. 0→40+ enterprise customers, launch cycles 14→5 weeks, $2M unlocked.",
+    "ogImageAlt": "Ankush Kumar, Senior Product Manager, AI Platforms"
+  },
+  "profile": {
+    "name": "Ankush Kumar",
+    "email": "asambyal23@gmail.com",
+    "eyebrow": "Senior Product Manager - AI Platforms - B2B SaaS",
+    "heroHtml": "I turn customer insight into <em>platform bets</em> that pay.",
+    "heroLedeHtml": "12 years building B2B SaaS in complex, high-stakes markets. For the last 4 years I've led AI platform product at Granicus: 0 to 40+ enterprise customers, launch cycles cut from <strong>14 weeks to 5</strong>, $2M in unlocked revenue.",
+    "heroPrimaryLabel": "Read my case studies",
+    "heroPrimaryHref": "#work",
+    "cvCtaLabel": "Download CV",
+    "heroNoteHtml": "Platform bets in AI, enterprise SaaS, and growth, taken from discovery to launch, with the numbers to prove it.",
+    "contactButtons": [
+      {
+        "type": "email",
+        "style": "email",
+        "label": "Email Me",
+        "href": "mailto:asambyal23@gmail.com"
+      },
+      {
+        "type": "phone",
+        "style": "ghost",
+        "label": "+91-9560283111",
+        "href": "tel:+919560283111"
+      },
+      {
+        "type": "linkedin",
+        "style": "linkedin",
+        "label": "LinkedIn",
+        "href": "https://linkedin.com/in/ankushkumar23",
+        "newTab": true
+      }
+    ],
+    "role": "Sr. PM, AI Platforms @ Granicus",
+    "location": "Bengaluru, India - Open to Remote",
+    "stats": [
+      {
+        "value": "12",
+        "suffix": "",
+        "label": "years in B2B SaaS"
+      },
+      {
+        "value": "40",
+        "suffix": "+",
+        "label": "enterprise customers"
+      },
+      {
+        "value": "500",
+        "suffix": "K+",
+        "label": "users impacted"
+      }
+    ],
+    "tags": [
+      "Platform Strategy",
+      "AI Agents",
+      "Evaluation",
+      "SSO",
+      "Analytics",
+      "Discovery",
+      "Experimentation",
+      "Roadmaps"
+    ]
+  },
+  "nav": [
+    {
+      "id": "experience",
+      "label": "Experience"
+    },
+    {
+      "id": "work",
+      "label": "Case Studies"
+    },
+    {
+      "id": "skills",
+      "label": "Skills"
+    },
+    {
+      "id": "teardowns",
+      "label": "Teardowns"
+    },
+    {
+      "id": "builds",
+      "label": "Build"
+    },
+    {
+      "id": "education",
+      "label": "Education"
+    },
+    {
+      "id": "contact",
+      "label": "Contact"
+    }
+  ],
+  "experience": {
+    "eyebrow": "Career history",
+    "heading": "Experience",
+    "jobs": [
+      {
+        "role": "Senior Product Manager, AI Platforms",
+        "company": "Granicus",
+        "industry": "B2B SaaS, GovTech",
+        "location": "Bengaluru (Remote), India",
+        "dates": "Nov 2021 - Present",
+        "badge": "Current",
+        "badgeClass": "pill",
+        "highlight": "Responsible AI scaled from 0 to 40+ customers and counting",
+        "bullets": [
+          "Optimized AI use-case launch time from 14 weeks to 5 by modularising the AI agent (GXA) into reusable chunking, embedding, and access-flow components.",
+          "Pitched and shipped centralised SSO after discovery flagged sign-in friction as the top adoption blocker, unlocking $2M in incremental revenue.",
+          "Owned the AI roadmap for the Customer Data Platform, turning 30+ enterprise customer interviews into bets that lifted engagement 30% across 500K+ users.",
+          "Killed a fine-tuning track after evals showed retrieval drove 80% of failures, redirecting the squad to reranking and lifting containment from 20% to 41%.",
+          "Redesigned customer service routing across CRM, messaging, and knowledge-base surfaces, cutting manual ops 30% and resolution time from 3 weeks to 2 weeks.",
+          "Defined the consent, access-control, and audit-logging model for AI workflows, making the assistant sellable into FedRAMP and GDPR-bound enterprise accounts.",
+          "Built the AI quality framework tracking retrieval accuracy, deflection, and adoption, the org's first shared definition of a working AI feature."
+        ]
+      },
+      {
+        "role": "Associate Product Manager",
+        "company": "Maropost",
+        "industry": "Marketing Automation",
+        "location": "Punjab, India",
+        "dates": "Jun 2020 - Oct 2021",
+        "badge": "+$3M ARR",
+        "badgeClass": "pill pill-green",
+        "highlight": "Grew ARR $3M through 12 growth experiments",
+        "bullets": [
+          "Grew ARR by $3M in a single quarter by running 12 A/B tests across onboarding and pricing, lifting signup-to-paid conversion 35%.",
+          "Shipped a conversational engagement product from concept to GA for 50K+ SMB customers, driving 30% more interactions and 15% less support volume.",
+          "Rebuilt PLG onboarding after 20+ discovery interviews, lifting activation and CSAT 60%.",
+          "Sequenced the roadmap across 3 squads, turning customer and sales signal into prioritised bets and cutting sprint carry-over 25%."
+        ]
+      },
+      {
+        "role": "Product Analyst",
+        "company": "RxAdvance PBM India",
+        "industry": "Healthcare",
+        "location": "Noida, India",
+        "dates": "Apr 2019 - Jun 2020",
+        "badge": "+30% engagement",
+        "badgeClass": "pill pill-green",
+        "highlight": "Lifted patient engagement 30% on regulated platform",
+        "bullets": [
+          "Lifted patient engagement 30% and renewals 20% by scoping a patient monitoring product around third-party risk-scoring models.",
+          "Delivered 5 features across 2 squads in 6 months on a regulated stack, while closing all audit findings on data governance.",
+          "Uncovered workflow gaps through discovery with care managers and payers across 3 accounts, resequencing the roadmap around real clinician needs."
+        ]
+      },
+      {
+        "role": "Product Analyst",
+        "company": "OATI",
+        "industry": "Enterprise Energy & Utility SaaS",
+        "location": "Mohali, India",
+        "dates": "May 2016 - Apr 2019",
+        "badge": "90% retention",
+        "badgeClass": "pill pill-green",
+        "highlight": "Held 90% retention across 200+ enterprise accounts",
+        "bullets": [
+          "Sustained 90% logo retention across 200+ US utility accounts by turning NPS signal into roadmap input across 5 releases, lifting CSAT 50%.",
+          "Productised enterprise onboarding into a standard configuration flow, shortening time-to-go-live 20% and support tickets 30%.",
+          "Translated compliance mandates into shippable roadmap scope for a regulated energy SaaS suite, across 3 engineering pods."
+        ]
+      },
+      {
+        "role": "Associate Analyst",
+        "company": "Google (via Binary Semantics Ltd)",
+        "industry": "",
+        "location": "Gurugram, India",
+        "dates": "Mar 2014 - May 2016",
+        "badge": "+40% velocity",
+        "badgeClass": "pill pill-green",
+        "highlight": "Drove Scrum transition, 40% velocity gain",
+        "bullets": [
+          "Accelerated delivery velocity 40% and time-to-ship 30% by moving a 30-person team from waterfall to Scrum.",
+          "Mined user behaviour data to surface content quality signals, formalised into guidelines adopted by a 200+ person org."
+        ]
+      }
+    ]
+  },
+  "caseStudies": {
+    "eyebrow": "Selected work",
+    "heading": "Case studies",
+    "intro": "Six shipped bets across AI platforms, enterprise SaaS, and growth. Each card shows the problem, what I did, and the measurable outcome.",
+    "items": [
+      {
+        "kicker": "Granicus, AI Platforms, 2021-Present",
+        "outcome": "14 wks to 5 wks, 0 to 40+ customers",
+        "title": "Modular agent platform",
+        "details": [
+          {
+            "label": "Problem",
+            "text": "every AI use case was a bespoke build, so each launch took ~14 weeks and the roadmap could not scale."
+          },
+          {
+            "label": "Research",
+            "text": "mapped repeat patterns across use cases with eng + design; identified reusable components (retrieval, orchestration, guardrails)."
+          },
+          {
+            "label": "Solution",
+            "text": "split the agent into modular components with shared evals and launch checklists; sequenced migration by impact."
+          },
+          {
+            "label": "Impact",
+            "text": "new use cases ship in 5 weeks; scaled from 0 to 40+ enterprise customers."
+          }
+        ],
+        "tags": [
+          "Platform Strategy",
+          "Roadmap",
+          "Modularisation"
+        ]
+      },
+      {
+        "kicker": "Granicus, Growth, 2021-Present",
+        "outcome": "$2M incremental revenue",
+        "title": "Centralised SSO",
+        "details": [
+          {
+            "label": "Problem",
+            "text": "sign-in friction blocked adoption across enterprise accounts."
+          },
+          {
+            "label": "Research",
+            "text": "discovery across enterprise admins flagged SSO as the top adoption blocker, ahead of feature asks."
+          },
+          {
+            "label": "Solution",
+            "text": "pitched SSO over feature work; shipped centralised SSO with GTM and rollout plan."
+          },
+          {
+            "label": "Impact",
+            "text": "$2M incremental revenue unlocked."
+          }
+        ],
+        "tags": [
+          "Discovery",
+          "Prioritisation",
+          "GTM"
+        ]
+      },
+      {
+        "kicker": "Granicus, Customer Data Platform",
+        "outcome": "+30% engagement, 500K+ users",
+        "title": "Interview-led CDP roadmap",
+        "details": [
+          {
+            "label": "Problem",
+            "text": "scattered asks across CRM, messaging, and knowledge surfaces with no clear sequencing."
+          },
+          {
+            "label": "Research",
+            "text": "30+ enterprise customer interviews; sized opportunities by reach and impact."
+          },
+          {
+            "label": "Solution",
+            "text": "sequenced roadmap across CRM, messaging, and knowledge; defined engagement success metrics up front."
+          },
+          {
+            "label": "Impact",
+            "text": "+30% engagement across 500K+ users."
+          }
+        ],
+        "tags": [
+          "Discovery",
+          "Prioritisation",
+          "Analytics"
+        ]
+      },
+      {
+        "kicker": "Granicus, AI Quality",
+        "outcome": "Containment 20% to 41%",
+        "title": "Evals over fine-tuning",
+        "details": [
+          {
+            "label": "Problem",
+            "text": "AI answers were inconsistent; the default ask was expensive fine-tuning."
+          },
+          {
+            "label": "Research",
+            "text": "evals showed retrieval drove ~80% of failures, not the model."
+          },
+          {
+            "label": "Solution",
+            "text": "killed the fine-tuning track; redirected the squad to reranking and retrieval quality with eval gates."
+          },
+          {
+            "label": "Impact",
+            "text": "containment doubled from 20% to 41% without fine-tuning cost."
+          }
+        ],
+        "tags": [
+          "Experimentation",
+          "Evals",
+          "Trade-offs"
+        ]
+      },
+      {
+        "kicker": "Maropost, Growth, 2020-2021",
+        "outcome": "$3M ARR in one quarter",
+        "title": "Onboarding and pricing experiments",
+        "details": [
+          {
+            "label": "Problem",
+            "text": "signup-to-paid conversion lagged across 50K+ SMB customers."
+          },
+          {
+            "label": "Research",
+            "text": "funnel and cohort analysis to find the highest-drop steps."
+          },
+          {
+            "label": "Solution",
+            "text": "ran 12 A/B tests across onboarding and pricing; shipped winners with success metrics defined per test."
+          },
+          {
+            "label": "Impact",
+            "text": "conversion up 35%; $3M ARR added in one quarter."
+          }
+        ],
+        "tags": [
+          "A/B Testing",
+          "PLG",
+          "Funnel"
+        ]
+      },
+      {
+        "kicker": "OATI, Retention, 2016-2019",
+        "outcome": "90% logo retention, 200+ accounts",
+        "title": "NPS-driven roadmap",
+        "details": [
+          {
+            "label": "Problem",
+            "text": "roadmap was driven by loudest-voice requests; at-risk accounts were invisible."
+          },
+          {
+            "label": "Research",
+            "text": "NPS program across 200+ accounts; linked detractor themes to roadmap items."
+          },
+          {
+            "label": "Solution",
+            "text": "turned NPS signal into sequenced roadmap input across 5 releases."
+          },
+          {
+            "label": "Impact",
+            "text": "90% logo retention; CSAT up 50%, support tickets down 30%."
+          }
+        ],
+        "tags": [
+          "Voice of Customer",
+          "Retention",
+          "Roadmap"
+        ]
+      }
+    ]
+  },
+  "skills": {
+    "eyebrow": "How I work",
+    "heading": "AI PM toolkit: how I actually build",
+    "intro": "I work like an AI PM, not a feature manager. Discovery with users, then evals, then ship. I decide what the model should do, what it must never do, and how we know it worked. The cards below are my real stack. Tap any card to see how I use it on real work.",
+    "items": [
+      {
+        "id": "evals",
+        "kicker": "My default starting point",
+        "title": "Evals before models",
+        "description": "I write the test before I touch the model. Golden sets, grounding checks, containment and accuracy. At Granicus this call moved containment from 20 to 41 percent with zero fine tuning.",
+        "more": "Tap to see my eval loop +",
+        "modal": {
+          "title": "Evals before models: my loop",
+          "intro": "I start every AI task by writing down what good looks like. No golden set, no ship. At Granicus the team wanted fine tuning. Evals showed retrieval caused 80 percent of failures, so we fixed chunking and reranking instead. Containment went from 20 to 41 percent.",
+          "steps": [
+            {
+              "lead": "Sample real traffic",
+              "text": "pull 200 past tickets, label the right answer and the source it must cite."
+            },
+            {
+              "lead": "Score separately",
+              "text": "retrieval hit, grounding, refusal quality. One blended score hides the real break."
+            },
+            {
+              "lead": "Gate the launch",
+              "text": "nothing ships below the bar. New misses become new evals."
+            }
+          ]
+        }
+      },
+      {
+        "id": "rag",
+        "kicker": "Where most AI fails",
+        "title": "Retrieval and grounding",
+        "description": "Most wrong answers are retrieval misses, not model misses. I work chunking, embeddings, reranking and citations until the answer can prove where it came from.",
+        "more": "Tap to see the method +",
+        "modal": {
+          "title": "Retrieval and grounding: my method",
+          "intro": "Users forgive a bot that says it does not know. They never forgive a confident lie. So I treat retrieval as the product. Clean chunks, fresh embeddings, rerank, then force a citation in the answer.",
+          "steps": [
+            {
+              "lead": "Chunk for the question",
+              "text": "policy sized pieces with headings kept, so the answer quotes the real rule."
+            },
+            {
+              "lead": "Rerank before answering",
+              "text": "cheap recall, careful second pass, drop anything below threshold."
+            },
+            {
+              "lead": "Cite or refuse",
+              "text": "no source means no answer, just a clean handoff with context kept."
+            }
+          ]
+        }
+      },
+      {
+        "id": "guard",
+        "kicker": "What the model must never do",
+        "title": "Guardrails and safe UX",
+        "description": "I design abstain and route flows, confidence thresholds and human review for edge cases. In regulated accounts a clean refusal beats a confident wrong answer.",
+        "more": "Tap to see the pattern +",
+        "modal": {
+          "title": "Guardrails and safe UX: the pattern",
+          "intro": "For regulated customers the refusal path is the feature. I set confidence bands: answer, ask one clarifying question, or refuse and route. Every refusal keeps full context so the human never starts cold.",
+          "steps": [
+            {
+              "lead": "Decide the never list",
+              "text": "legal, medical and access decisions always route to a human."
+            },
+            {
+              "lead": "Design the abstain",
+              "text": "plain language, why it stopped, what happens next, time estimate."
+            },
+            {
+              "lead": "Log everything",
+              "text": "prompt, sources, score, decision. Audit trail ships with the feature."
+            }
+          ]
+        }
+      },
+      {
+        "id": "agent",
+        "kicker": "From demo to platform",
+        "title": "Agents and platforms",
+        "description": "I turn one-off demos into reusable pieces. At Granicus I split the agent into chunking, embedding and access flow parts, which cut launch time from 14 weeks to 5 and grew us from 0 to 40 plus customers.",
+        "more": "Tap to see the split +",
+        "modal": {
+          "title": "Agents and platforms: the split",
+          "intro": "One-off bots do not scale. At Granicus I broke our agent into three reusable parts: how we split content, how we find it, and who is allowed to see it. New use cases then became assembly, not rebuilds. Launch time fell from 14 weeks to 5.",
+          "steps": [
+            {
+              "lead": "Chunking service",
+              "text": "one way to split and version content."
+            },
+            {
+              "lead": "Retrieval service",
+              "text": "one way to embed, rerank and cite."
+            },
+            {
+              "lead": "Access flows",
+              "text": "one way to check consent and permission before answering."
+            }
+          ],
+          "result": "0 to 40 plus enterprise customers on the same base."
+        }
+      },
+      {
+        "id": "data",
+        "kicker": "Proof, not vibes",
+        "title": "Experimentation and analytics",
+        "description": "I run growth like science. At Maropost 12 tests in a quarter added $3M ARR. Funnels, cohorts, SQL, and a log so we never retest a settled question.",
+        "more": "Tap to see the playbook +",
+        "modal": {
+          "title": "Experimentation and analytics: the playbook",
+          "intro": "At Maropost we ran 12 tests in a quarter and added 3M ARR. The trick was not more ideas, it was a shared log: hypothesis, metric, result, learning. Winners scaled, losers stayed dead.",
+          "steps": [
+            {
+              "lead": "One hypothesis per test",
+              "text": "if everything changes, nothing learned."
+            },
+            {
+              "lead": "Metric first",
+              "text": "activation, retention or revenue, picked before ship."
+            },
+            {
+              "lead": "Weekly readout",
+              "text": "top 3 learnings shared, backlog reprioritised."
+            }
+          ]
+        }
+      },
+      {
+        "id": "enter",
+        "kicker": "Why enterprise buys",
+        "title": "Enterprise readiness",
+        "description": "SSO, consent, access control, audit logs, residency. I shipped centralised SSO for $2M in revenue because sign in friction was blocking every big deal.",
+        "more": "Tap to see the checklist +",
+        "modal": {
+          "title": "Enterprise readiness: the checklist",
+          "intro": "Big deals die on trust, not features. Discovery told me sign in friction blocked adoption, so I pitched centralised SSO ahead of feature work. It unlocked 2M in revenue and opened FedRAMP and GDPR accounts.",
+          "steps": [
+            {
+              "lead": "Identity first",
+              "text": "SSO, provisioning, clean offboarding."
+            },
+            {
+              "lead": "Proof built in",
+              "text": "consent records, access checks, audit logs, residency options."
+            },
+            {
+              "lead": "Rollout plan",
+              "text": "pilot tenant, admin docs, support script, rollback path."
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "teardowns": {
+    "eyebrow": "Teardowns, click a card",
+    "heading": "Teardowns: how I read a product",
+    "intro": "One teardown of my own AI support work, in four parts. Each card opens the full breakdown: who it serves, where it breaks, what I would fix first and how I would measure it.",
+    "cards": [
+      {
+        "id": "td-support",
+        "hint": "Full teardown inside +",
+        "title": "1. Why AI support answers fail",
+        "paragraphs": [
+          "<strong>Problem:</strong> enterprise support teams drown in repetitive tickets; end users wait hours for simple answers. AI agents promise relief but hallucinate, breaking trust.",
+          "<strong>Persona:</strong> support ops lead at a 500+ seat B2B SaaS, owns CSAT and handle time, fears wrong answers more than slow answers."
+        ]
+      },
+      {
+        "id": "td-compare",
+        "hint": "Full teardown inside +",
+        "title": "2. Journey and competition",
+        "paragraphs": [
+          "<strong>Journey:</strong> ticket arrives to bot attempts answer to low confidence to human handoff to resolution logged to bot learns (or doesn't).",
+          "<strong>Competition:</strong> Intercom Fin and Zendesk AI optimise containment; Sierra and Decagon sell accuracy + evals. Differentiator: eval-gated answers with cited sources, not raw containment."
+        ]
+      },
+      {
+        "id": "td-money",
+        "hint": "Full teardown inside +",
+        "title": "3. What is unique and money",
+        "paragraphs": [
+          "<strong>Unique:</strong> retrieval-grounded answers with confidence thresholds, abstain-and-route beats confident-and-wrong in regulated markets.",
+          "<strong>Monetisation:</strong> per-resolution pricing aligns cost with value; enterprise tier adds audit logs, residency, SSO."
+        ]
+      },
+      {
+        "id": "td-fixes",
+        "hint": "Full teardown inside +",
+        "title": "4. Top 3 improvements",
+        "ordered": [
+          {
+            "lead": "Eval-gated launch checklist",
+            "meta": "high impact / low effort",
+            "text": "block launch below containment + accuracy bars.",
+            "note": "Metric: % answers with citations; containment."
+          },
+          {
+            "lead": "Abstain-and-route UX",
+            "meta": "high / medium",
+            "text": "show confidence, route gracefully.",
+            "note": "Metric: reopen rate, CSAT on bot conversations."
+          },
+          {
+            "lead": "Closed-loop learning inbox",
+            "meta": "medium / medium",
+            "text": "agents review edge cases weekly.",
+            "note": "Metric: week-over-week eval pass rate."
+          }
+        ]
+      }
+    ],
+    "outroHtml": "Want this lens on your product? <a href=\"#contact\">Reach out</a> and I will walk you through it.",
+    "modals": [
+      {
+        "id": "td-support",
+        "title": "Why AI support answers fail",
+        "paragraphs": [
+          "<strong>Problem:</strong> support teams drown in repeat tickets while users wait hours for simple answers. Bots promise relief but guess, and one wrong policy answer burns more trust than ten slow ones.",
+          "<strong>Persona:</strong> support ops lead at a 500 seat B2B SaaS. Owns CSAT and handle time. Fears wrong answers more than slow answers.",
+          "<strong>Journey:</strong> ticket arrives, bot drafts, low confidence should hand off, human resolves, edge case feeds back into evals. It breaks at retrieval miss, overconfident reply, and handoff that drops context.",
+          "<strong>Fix I would ship first:</strong> eval gated launch checklist. Nothing goes live below the containment and accuracy bar. Metric: share of answers with citations plus containment."
+        ]
+      },
+      {
+        "id": "td-compare",
+        "title": "Journey and competition",
+        "paragraphs": [
+          "<strong>Flow:</strong> ticket arrives, bot tries, low confidence hands to human, resolution gets logged, bot should learn. Most bots skip the last step.",
+          "<strong>Competition:</strong> Intercom Fin and Zendesk AI push containment. Sierra and Decagon sell accuracy plus evals. My read: eval gated answers with cited sources beat raw containment in regulated markets."
+        ]
+      },
+      {
+        "id": "td-money",
+        "title": "What is unique and money",
+        "paragraphs": [
+          "<strong>Unique:</strong> grounded answers with confidence bands. Abstain and route beats confident and wrong where compliance matters.",
+          "<strong>Money:</strong> per resolution pricing fits value. Enterprise tier adds audit logs, residency and SSO. Pilot on low risk intents, expand only as evals pass."
+        ]
+      },
+      {
+        "id": "td-fixes",
+        "title": "Top 3 improvements I would ship",
+        "steps": [
+          {
+            "lead": "Eval gated launch checklist.",
+            "text": "High impact, low effort. Block launch below the bar.",
+            "note": "Metric: cited answer share and containment."
+          },
+          {
+            "lead": "Abstain and route UX.",
+            "text": "High impact, medium effort. Show confidence, route cleanly.",
+            "note": "Metric: reopen rate and CSAT."
+          },
+          {
+            "lead": "Closed loop learning inbox.",
+            "text": "Agents review edge cases weekly and each becomes an eval.",
+            "note": "Metric: eval pass rate week over week."
+          }
+        ]
+      }
+    ]
+  },
+  "builds": {
+    "eyebrow": "Build",
+    "heading": "From problem to shipped: experiment tracker",
+    "intro": "A no-code build I shipped using the same loop I run at work, identify the pain, prioritise by impact and effort, design the flow, launch small, and measure. Born from my Maropost experimentation playbook.",
+    "cards": [
+      {
+        "kicker": "Problem to prioritised solution",
+        "title": "Experiment tracker for growth squads",
+        "paragraphs": [
+          "<strong>Pain:</strong> experiment learnings lived in scattered docs, winners got re-tested, losers got repeated. <strong>Sizing:</strong> a squad running 12 tests/quarter loses ~2 weeks re-arguing old results.",
+          "<strong>Options considered:</strong> wiki page, spreadsheet log, lightweight tracker. <strong>Pick:</strong> tracker, highest impact (searchable memory) for lowest effort (one table + views)."
+        ],
+        "tags": [
+          "No-code",
+          "Impact and Effort",
+          "Airtable/Notion"
+        ]
+      },
+      {
+        "kicker": "Design to build to launch",
+        "title": "What v1 looks like",
+        "steps": [
+          {
+            "lead": "Flow",
+            "text": "log hypothesis to define metric + sample to ship to record result to tag learnings."
+          },
+          {
+            "lead": "Build",
+            "text": "one table (hypothesis, metric, result, learning) with filtered views per squad, no-code, one afternoon."
+          },
+          {
+            "lead": "Launch",
+            "text": "pilot with one squad, share top-3 learnings weekly; iterate on fields from feedback."
+          },
+          {
+            "lead": "Success",
+            "text": "% experiments with documented learnings; repeat-test rate trending down."
+          }
+        ]
+      }
+    ]
+  },
+  "education": {
+    "eyebrow": "Foundations",
+    "heading": "Education",
+    "degrees": [
+      {
+        "degree": "B.Tech, Electrical and Electronics Engineering",
+        "detail": "SSCET, Pathankot (Punjab Technical University), 2007 - 2011"
+      }
+    ],
+    "certsEyebrow": "Always sharpening",
+    "certsHeading": "Certifications",
+    "certs": [
+      {
+        "name": "Certified Scrum Product Owner (CSPO)",
+        "year": "2023"
+      },
+      {
+        "name": "AI and Agility Certification",
+        "year": "2024"
+      },
+      {
+        "name": "AI Security Certification",
+        "year": "2025"
+      },
+      {
+        "name": "FedRAMP and Cloud Compliance Training",
+        "year": "2026"
+      }
+    ]
+  },
+  "contact": {
+    "eyebrow": "Open to what's next",
+    "heading": "Let's build AI users can trust.",
+    "lede": "Senior PM roles in AI platforms, agents and enterprise SaaS. Bengaluru or remote.",
+    "email": "asambyal23@gmail.com",
+    "emailLabel": "Email Me",
+    "linkedin": "https://linkedin.com/in/ankushkumar23",
+    "cvLabel": "CV",
+    "line": "asambyal23@gmail.com - +91-9560283111 - Bengaluru, Open to Remote"
+  },
+  "footer": {
+    "text": "Ankush Kumar, Senior PM, AI Platforms"
+  }
+}
