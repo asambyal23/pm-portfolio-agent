@@ -16,7 +16,7 @@ You are updating a PM's portfolio. The content lives in `profile.json` — **edi
    ```bash
    npm run validate && npm run build && npm run dev
    ```
-6. Summarise exactly what changed, field by field, so the user can review before `git push` (push = auto-deploy).
+6. Summarise exactly what changed, field by field, so the user can review, then publish with `npm run build && npm run deploy`.
 
 ## Anti-fabrication on updates
 Same rule as creation: new numbers must come from the user. If they say "the project did better after launch", ask **what** it did — do not extrapolate.

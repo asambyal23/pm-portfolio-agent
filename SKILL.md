@@ -50,21 +50,22 @@ npm run dev                                          # preview at localhost:8000
 
 **Never ask for / never pad with**: invented percentages, "roughly how much revenue", customer names they didn't provide, tools they didn't use.
 
-### 6. Deploy — a MANUAL, user-only step (call this out explicitly)
+### 6. Publish — a MANUAL, user-driven step (call this out explicitly)
 
-**You (the agent) cannot deploy.** Cloudflare requires the user's account, dashboard login, and API token — none of which you can create or should ever ask for in chat. Your job ends at a valid `profile.json` + green local build. Then hand the user this checklist verbatim, and **never claim the site is "live"** until the user shows you a green Actions run.
+**Publishing to Cloudflare is the user's step.** You (the agent) stop after a valid `profile.json`, a green build, and a local preview. **Never claim the site is live** until the user confirms the publish succeeded.
 
-**One-time Cloudflare setup (~5 minutes, user does this in a browser):**
+Publishing is deliberately manual and simple — no tokens, no secrets. Hand the user these commands:
 
-1. **API token:** dash.cloudflare.com → profile icon → **My Profile** → **API Tokens** → **Create Token** → the **"Edit Cloudflare Workers"** template (Pages deploys via the Workers API) → scope to their account → copy it.
-2. **Account ID:** dash.cloudflare.com → right sidebar → copy.
-3. **Add to the repo:** **Settings → Secrets and variables → Actions** → secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`; **Variables** tab → variable `CLOUDFLARE_PROJECT_NAME` (their Pages project name; defaults to `pm-portfolio`).
-4. **Push to `main`.** The workflow builds `dist/` from `profile.json` and deploys to Cloudflare Pages. Every future `git push` redeploys automatically.
+```bash
+npm run build           # render dist/ from profile.json
+npx wrangler login      # one-time: opens their browser to log into Cloudflare
+npm run deploy          # publishes dist/ to Cloudflare Pages
+```
 
-Full details and screenshots-free walkthrough: [README → Deployment](README.md#deployment).
-
-- **No-token alternative:** Cloudflare Pages dashboard Git integration (README → Deployment → Option B). Cloudflare builds on push — no GitHub secrets, but also no GitHub-side build log.
-- **If the user defers setup:** say so plainly. The site still builds and previews locally (`npm run dev`), and deploys the moment setup is done. The workflow detects missing secrets, **skips the deploy step, and prints these same instructions** in the run log — so a missing setup shows as a friendly skip with a yellow notice, not a cryptic red ✖.
+- The first `npm run deploy` creates the Pages project (default project name `pm-portfolio`; they can change it in the `deploy` script in `package.json` before the first publish).
+- Every later content update ends the same way: `npm run build && npm run deploy`.
+- **No-CLI alternative:** dashboard drag-and-drop of `dist/` (README → Deployment → Option B).
+- **Optional automation:** the repo's GitHub Actions workflow can deploy on `git push` (README → Deployment → Option C). Its setup (API token + GitHub secrets) is user-only — never ask for tokens in chat. The workflow **skips** the deploy with a printed checklist when secrets are missing: a pending setup is a warning, not a red ✖.
 
 ## Updating an existing portfolio
 The user's data lives **only** in `profile.json`. To update content, edit the JSON — never the template — then rebuild. See [`prompts/update-portfolio.md`](prompts/update-portfolio.md). If a change seems to require template edits, stop: 95% of changes are data changes.

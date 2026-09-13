@@ -1,13 +1,14 @@
 {
   "name": "pm-portfolio-agent",
   "version": "1.0.0",
-  "description": "An AI-agent-ready Product Manager portfolio: edit one JSON file (or let an AI agent do it), run one command, push to GitHub, and Cloudflare Pages deploys it automatically.",
+  "description": "An AI-agent-ready Product Manager portfolio: edit one JSON file (or let an AI agent do it), run one command to build, one more to publish on Cloudflare Pages.",
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
     "generate": "node build.mjs",
     "validate": "node build.mjs --dry",
-    "dev": "node build.mjs && node serve.mjs"
+    "dev": "node build.mjs && node serve.mjs",
+    "deploy": "npx wrangler pages deploy dist --project-name=pm-portfolio"
   },
   "engines": {
     "node": ">=18"

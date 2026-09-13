@@ -2,9 +2,9 @@
 
 # PM Portfolio Agent
 
-**Turn your resume into a professional Product Manager portfolio with an AI agent — and deploy it to Cloudflare Pages automatically on every `git push`.**
+**Turn your resume into a professional Product Manager portfolio with an AI agent — and publish it to Cloudflare Pages with one command.**
 
-One JSON file holds your content. One command builds the site. Zero npm dependencies. No manual uploads, ever.
+One JSON file holds your content. One command builds the site. One more publishes it. Zero npm dependencies.
 
 [Live demo](https://ankush-kumar.pages.dev) · [Data schema](schema.md) · [Agent skill](SKILL.md) · [Prompts](prompts/)
 
@@ -19,7 +19,7 @@ A **reusable portfolio template + AI agent skill** for Product Managers:
 - **Design** — a fast, dark-themed, recruiter-friendly single page (case studies, experience timeline, PM toolkit with tap-to-open deep-dives, teardowns, builds, education, contact). No framework, no build-time dependencies — hand-rolled CSS/JS.
 - **Content/presentation split** — *everything personal lives in one `profile.json`*. The template never contains your data.
 - **AI agent** — [`SKILL.md`](SKILL.md) + 7 task prompts teach any capable AI agent (Claude, ChatGPT, Cursor, …) to convert your raw resume into `profile.json`, write credible outcome-led copy, and **never fabricate a metric**.
-- **CI/CD** — GitHub Actions builds the site and deploys to Cloudflare Pages on every push to `main` (one-time Cloudflare setup required — the project's **only manual step**, see [Deployment](#deployment)).
+- **Publish** — one command (`npm run deploy`) puts your site on Cloudflare Pages; an optional GitHub Actions workflow can automate it (see [Deployment](#deployment)).
 
 ## Architecture
 
@@ -39,10 +39,8 @@ your resume / notes
  dist/               (static site: index.html + styles.css + script.js + assets)
         │
         ▼
- git push  ──►  GitHub Actions (.github/workflows/deploy.yml)
-                     │
-                     ▼
-                Cloudflare Pages  ──►  https://yourname.pages.dev
+ npm run deploy  ──►  Cloudflare Pages  ──►  https://yourname.pages.dev
+        (or the optional GitHub Actions workflow — see Deployment)
 ```
 
 ## Quick start
@@ -68,7 +66,7 @@ Now make it yours:
    npm run build      # renders dist/ from profile.json
    npm run dev        # http://localhost:8000
    ```
-4. **Deploy** — one-time manual Cloudflare setup (~5 min, the only manual step), then every `git push` deploys automatically (see [Deployment](#deployment)).
+4. **Publish:** `npx wrangler login` (one-time), then `npm run deploy` — your site is live (see [Deployment](#deployment)).
 
 ## Commands
 
@@ -99,29 +97,38 @@ The agent's prime directive (see [`SKILL.md`](SKILL.md)): **never fabricate metr
 
 ## Deployment
 
-> ⚠️ **Cloudflare is the ONE manual step in this project.** The AI agent builds your site, but it cannot create your Cloudflare account, Pages project, or API token — those live behind your Cloudflare dashboard login. Do the one-time setup below once (~5 minutes); every deploy after that is fully automatic. Without it, the workflow skips deploying and prints these instructions (and `npm run dev` still previews locally).
+Publishing is **manual and one command** — no tokens, no secrets, no CI required:
 
-### Option A — GitHub Actions → Cloudflare Pages (recommended)
+### Option A — One-command publish (recommended)
 
-One-time setup (manual — your AI agent will hand you this checklist, see [SKILL.md §6](SKILL.md#6-deploy--a-manual-user-only-step-call-this-out-explicitly)):
+```bash
+npm run build           # render dist/ from profile.json
+npx wrangler login      # one-time: opens your browser to log into Cloudflare
+npm run deploy          # publishes dist/ to Cloudflare Pages
+```
 
-1. Push this repo to your GitHub account.
-2. Create a Cloudflare API token: **dash.cloudflare.com → My Profile → API Tokens → Create Token** → use the "Edit Cloudflare Workers" template (Cloudflare Pages deploys via the Workers API) — scope it to your account.
-3. In your GitHub repo: **Settings → Secrets and variables → Actions** and add:
+- The first `npm run deploy` creates the Pages project. It defaults to the project name `pm-portfolio`; to control your `*.pages.dev` URL, change the name in the `deploy` script in `package.json` (e.g. `--project-name=yourname`) **before** the first publish.
+- **Every future update is the same two commands:** `npm run build && npm run deploy`.
+- `npm run deploy` is a thin wrapper around `npx wrangler pages deploy dist` — wrangler downloads on demand, nothing is installed. If you prefer an API token over browser login, set `CLOUDFLARE_API_TOKEN` in your shell before running it.
+
+### Option B — Dashboard drag-and-drop (no CLI)
+
+Cloudflare dashboard → **Workers & Pages → Create → Pages → Upload assets** → drag the `dist/` folder in. Repeat after each `npm run build`. Fine for occasional updates; Option A is nicer when you publish often.
+
+### Option C — GitHub Actions auto-deploy (optional)
+
+If you want `git push` to deploy automatically, the bundled workflow (`.github/workflows/deploy.yml`) does it — after a one-time setup **you** must do (an AI agent cannot create these):
+
+1. Create a Cloudflare API token: **dash.cloudflare.com → My Profile → API Tokens → Create Token** → "Edit Cloudflare Workers" template → scope it to your account.
+2. In your GitHub repo → **Settings → Secrets and variables → Actions**:
 
 | Name | Type | Value |
 |---|---|---|
-| `CLOUDFLARE_API_TOKEN` | Secret | the token from step 2 |
-| `CLOUDFLARE_ACCOUNT_ID` | Secret | dash.cloudflare.com → any domain → right sidebar "Account ID" |
+| `CLOUDFLARE_API_TOKEN` | Secret | the token from step 1 |
+| `CLOUDFLARE_ACCOUNT_ID` | Secret | dash.cloudflare.com → right sidebar "Account ID" |
 | `CLOUDFLARE_PROJECT_NAME` | Variable | your Pages project name, e.g. `yourname` (defaults to `pm-portfolio`) |
 
-4. Push to `main`. The workflow (`.github/workflows/deploy.yml`) builds `dist/` from `profile.json` and deploys it. Every future `git push` redeploys automatically.
-
-> First run creates the Pages project if it doesn't exist. To control your `*.pages.dev` name, create the project once in the Cloudflare dashboard (**Workers & Pages → Create → Pages → Upload assets**, name it, deploy anything) and set `CLOUDFLARE_PROJECT_NAME` to match.
-
-### Option B — Cloudflare Pages Git integration (simpler, no secrets)
-
-In the Cloudflare dashboard: **Workers & Pages → Create → Pages → Connect to Git** → pick this repo → build command `npm run build`, output directory `dist`. Cloudflare then builds and deploys on every push — no GitHub secrets needed. Choose this if you'd rather not manage API tokens.
+3. Push to `main` (or re-run the workflow). Until the secrets exist, the workflow still **builds and validates** the site, then **skips** the deploy and prints these same instructions in the run log — pending setup is a warning, never a red ✖.
 
 ## Repository structure
 
@@ -141,7 +148,7 @@ In the Cloudflare dashboard: **Workers & Pages → Create → Pages → Connect 
 │   ├── ankush-profile.json      # full example (the live demo site)
 │   └── test-jane-profile.json   # minimal fixture proving optional sections omit cleanly
 ├── prompts/                     # 7 task prompts for the agent
-├── .github/workflows/deploy.yml # build + deploy to Cloudflare Pages
+├── .github/workflows/deploy.yml # OPTIONAL auto-deploy (skips until secrets are set)
 └── dist/                        # build output (gitignored)
 ```
 
