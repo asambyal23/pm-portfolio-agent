@@ -2,7 +2,7 @@
 
 # PM Portfolio Agent
 
-**Turn your resume into a professional Product Manager portfolio with an AI agent — and publish it to Cloudflare Pages with one command.**
+**Turn your resume into a professional Product Manager portfolio with an AI agent — and publish it to Cloudflare Pages with one command (free hosting).**
 
 One JSON file holds your content. One command builds the site. One more publishes it. Zero npm dependencies.
 
@@ -97,7 +97,7 @@ The agent's prime directive (see [`SKILL.md`](SKILL.md)): **never fabricate metr
 
 ## Deployment
 
-Publishing is **manual and one command** — no tokens, no secrets, no CI required:
+Publishing is **free and manual** — one command, no tokens, no secrets, no CI required. Cloudflare Pages' free plan includes unlimited bandwidth and requests, 500 builds/month, a free `yourname.pages.dev` URL, and free custom-domain SSL — no credit card needed to sign up.
 
 ### Option A — One-command publish (recommended)
 

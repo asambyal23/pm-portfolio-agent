@@ -54,7 +54,7 @@ npm run dev                                          # preview at localhost:8000
 
 **Publishing to Cloudflare is the user's step.** You (the agent) stop after a valid `profile.json`, a green build, and a local preview. **Never claim the site is live** until the user confirms the publish succeeded.
 
-Publishing is deliberately manual and simple — no tokens, no secrets. Hand the user these commands:
+Publishing is deliberately manual and simple — no tokens, no secrets, and **free hosting** on Cloudflare Pages' free plan (a free Cloudflare account is all they need). Hand the user these commands:
 
 ```bash
 npm run build           # render dist/ from profile.json
