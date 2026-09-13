@@ -50,8 +50,21 @@ npm run dev                                          # preview at localhost:8000
 
 **Never ask for / never pad with**: invented percentages, "roughly how much revenue", customer names they didn't provide, tools they didn't use.
 
-### 6. Deploy (user-driven, one time)
-The repo's GitHub Action deploys on every push to `main` (see [README → Deployment](README.md#deployment)). The agent's job ends at a valid `profile.json` + green build. Remind the user of the one-time secrets setup (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, var `CLOUDFLARE_PROJECT_NAME`).
+### 6. Deploy — a MANUAL, user-only step (call this out explicitly)
+
+**You (the agent) cannot deploy.** Cloudflare requires the user's account, dashboard login, and API token — none of which you can create or should ever ask for in chat. Your job ends at a valid `profile.json` + green local build. Then hand the user this checklist verbatim, and **never claim the site is "live"** until the user shows you a green Actions run.
+
+**One-time Cloudflare setup (~5 minutes, user does this in a browser):**
+
+1. **API token:** dash.cloudflare.com → profile icon → **My Profile** → **API Tokens** → **Create Token** → the **"Edit Cloudflare Workers"** template (Pages deploys via the Workers API) → scope to their account → copy it.
+2. **Account ID:** dash.cloudflare.com → right sidebar → copy.
+3. **Add to the repo:** **Settings → Secrets and variables → Actions** → secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`; **Variables** tab → variable `CLOUDFLARE_PROJECT_NAME` (their Pages project name; defaults to `pm-portfolio`).
+4. **Push to `main`.** The workflow builds `dist/` from `profile.json` and deploys to Cloudflare Pages. Every future `git push` redeploys automatically.
+
+Full details and screenshots-free walkthrough: [README → Deployment](README.md#deployment).
+
+- **No-token alternative:** Cloudflare Pages dashboard Git integration (README → Deployment → Option B). Cloudflare builds on push — no GitHub secrets, but also no GitHub-side build log.
+- **If the user defers setup:** say so plainly. The site still builds and previews locally (`npm run dev`), and deploys the moment setup is done. The workflow detects missing secrets, **skips the deploy step, and prints these same instructions** in the run log — so a missing setup shows as a friendly skip with a yellow notice, not a cryptic red ✖.
 
 ## Updating an existing portfolio
 The user's data lives **only** in `profile.json`. To update content, edit the JSON — never the template — then rebuild. See [`prompts/update-portfolio.md`](prompts/update-portfolio.md). If a change seems to require template edits, stop: 95% of changes are data changes.

@@ -19,7 +19,7 @@ A **reusable portfolio template + AI agent skill** for Product Managers:
 - **Design** — a fast, dark-themed, recruiter-friendly single page (case studies, experience timeline, PM toolkit with tap-to-open deep-dives, teardowns, builds, education, contact). No framework, no build-time dependencies — hand-rolled CSS/JS.
 - **Content/presentation split** — *everything personal lives in one `profile.json`*. The template never contains your data.
 - **AI agent** — [`SKILL.md`](SKILL.md) + 7 task prompts teach any capable AI agent (Claude, ChatGPT, Cursor, …) to convert your raw resume into `profile.json`, write credible outcome-led copy, and **never fabricate a metric**.
-- **CI/CD** — GitHub Actions builds the site and deploys to Cloudflare Pages on every push to `main`.
+- **CI/CD** — GitHub Actions builds the site and deploys to Cloudflare Pages on every push to `main` (one-time Cloudflare setup required — the project's **only manual step**, see [Deployment](#deployment)).
 
 ## Architecture
 
@@ -68,7 +68,7 @@ Now make it yours:
    npm run build      # renders dist/ from profile.json
    npm run dev        # http://localhost:8000
    ```
-4. **Deploy** (see [Deployment](#deployment)).
+4. **Deploy** — one-time manual Cloudflare setup (~5 min, the only manual step), then every `git push` deploys automatically (see [Deployment](#deployment)).
 
 ## Commands
 
@@ -99,9 +99,11 @@ The agent's prime directive (see [`SKILL.md`](SKILL.md)): **never fabricate metr
 
 ## Deployment
 
+> ⚠️ **Cloudflare is the ONE manual step in this project.** The AI agent builds your site, but it cannot create your Cloudflare account, Pages project, or API token — those live behind your Cloudflare dashboard login. Do the one-time setup below once (~5 minutes); every deploy after that is fully automatic. Without it, the workflow skips deploying and prints these instructions (and `npm run dev` still previews locally).
+
 ### Option A — GitHub Actions → Cloudflare Pages (recommended)
 
-One-time setup:
+One-time setup (manual — your AI agent will hand you this checklist, see [SKILL.md §6](SKILL.md#6-deploy--a-manual-user-only-step-call-this-out-explicitly)):
 
 1. Push this repo to your GitHub account.
 2. Create a Cloudflare API token: **dash.cloudflare.com → My Profile → API Tokens → Create Token** → use the "Edit Cloudflare Workers" template (Cloudflare Pages deploys via the Workers API) — scope it to your account.
