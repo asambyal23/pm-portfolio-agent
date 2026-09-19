@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Eval operating sheet — AI support answers (Ankush Kumar)</title>
+<meta name="description" content="Eval operating sheet: five dimensions plus observability and human-in-the-loop, gate rule, and a field example from the Evals over fine-tuning case study." />
+<link rel="stylesheet" href="styles.css?v=11" />
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<main id="main">
+<section class="section">
+<div class="container">
+<p class="eyebrow">Artifact — evals over fine-tuning</p>
+<h1>Eval operating sheet: AI support answers</h1>
+<p class="lede">How the eval loop from the <a href="index.html#work">Evals over fine-tuning case study</a> runs in production: five dimensions scored separately, observability on every answer, and a human-in-the-loop where the stakes demand it. Nothing ships below the bar; every new miss becomes a new eval.</p>
+<div class="timeline">
+<article class="job">
+<div class="job-head"><div><h3>Dimension 1 — Retrieval hit</h3><p class="job-sub">Did we fetch the right source?</p></div><span class="pill pill-green">Gate: must cite</span></div>
+<p class="job-highlight">Pass = answer cites the exact policy section it relied on. No citation = fail, even if the wording sounds right.</p>
+<ul><li>Source ID recorded for every answer.</li><li>Stale or superseded policy version = fail.</li></ul>
+</article>
+<article class="job">
+<div class="job-head"><div><h3>Dimension 2 — Grounding</h3><p class="job-sub">Does the answer stay inside the source?</p></div><span class="pill pill-green">Gate: no invention</span></div>
+<p class="job-highlight">Pass = every claim traceable to the cited source. Any invented detail = fail.</p>
+<ul><li>Quotes beat paraphrase for regulated answers.</li><li>Uncertainty must be stated, not smoothed over.</li></ul>
+</article>
+<article class="job">
+<div class="job-head"><div><h3>Dimension 3 — Refusal quality</h3><p class="job-sub">When unsure, does it route cleanly?</p></div><span class="pill pill-green">Gate: clean handoff</span></div>
+<p class="job-highlight">Pass = plain-language stop reason, what happens next, time estimate, full context handed to the human.</p>
+<ul><li>Legal, access, and billing-edge decisions always route to a human.</li><li>Handoff that drops context = fail.</li></ul>
+</article>
+<article class="job">
+<div class="job-head"><div><h3>Dimension 4 — Observability</h3><p class="job-sub">Can we see what the agent did?</p></div><span class="pill pill-green">Gate: full trace</span></div>
+<p class="job-highlight">Every answer logs query, retrieved sources with versions, confidence, policy path taken, and outcome.</p>
+<ul><li>Dashboard: containment, citation rate, reopen rate, and eval pass rate week over week.</li><li>Any answer without a trace = fail, treated like a wrong answer.</li></ul>
+</article>
+<article class="job">
+<div class="job-head"><div><h3>Dimension 5 — Human-in-the-loop</h3><p class="job-sub">Where do humans stay in control?</p></div><span class="pill pill-green">Gate: review path</span></div>
+<p class="job-highlight">Low-confidence and high-stakes answers queue for agent review before or after send; each reviewed miss becomes a golden-set eval.</p>
+<ul><li>Weekly review inbox: edge cases triaged, labels corrected, eval set extended.</li><li>High-stakes categories never auto-send, regardless of confidence.</li></ul>
+</article>
+<article class="job">
+<div class="job-head"><div><h3>Field example</h3><p class="job-sub">How one miss became one eval</p></div><span class="pill">From the case study</span></div>
+<ul>
+<li><strong>Ticket:</strong> “Can I get a refund after the renewal date?” Bot answered yes with no citation.</li>
+<li><strong>Scores:</strong> retrieval fail (wrong policy version), grounding fail (invented exception), refusal fail (should have routed). Observability flagged the missing trace; human review added it to the golden set.</li>
+<li><strong>Action:</strong> added as a golden-set eval; launch gate stays red until this class passes.</li>
+</ul>
+</article>
+</div>
+<p class="lede" style="margin-top:20px"><a href="index.html#work">Back to case studies</a> · <a href="Ankush_Kumar_CV.pdf" download>Download CV</a></p>
+</div>
+</section>
+</main>
+<footer class="footer"><div class="container footer-inner"><span>Ankush Kumar, Senior PM, AI Platforms</span><span>© <span id="year">2026</span></span></div></footer>
+<script src="script.js?v=11" defer></script>
+</body>
+</html>

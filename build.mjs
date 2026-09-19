@@ -15,6 +15,11 @@
  *   node build.mjs                        # uses ./profile.json, falls back to examples/ankush-profile.json
  *   node build.mjs --profile mydata.json  # explicit profile
  *   node build.mjs --dry                  # validate + render, but do not write dist/
+ *
+ * Required inputs (fail fast with a helpful message when missing):
+ *   1. profile content — profile.json (or --profile <file>)
+ *   2. CV file        — assets/<site.cv> (e.g. assets/Ankush_Kumar_CV.pdf)
+ *   3. Profile photo  — assets/<site.photo> (e.g. assets/profile.jpg)
  */
 
 import {
@@ -168,6 +173,28 @@ requireField('seo.title', data.seo?.title);
 requireField('seo.description', data.seo?.description);
 requireField('site.url', data.site?.url);
 requireField('contact.email', data.contact?.email);
+
+/* -------- Required inputs: CV + profile photo must exist in assets/ -------- */
+const errors = [];
+const needAsset = (label, filename) => {
+  if (!filename) {
+    errors.push(`✖ missing: site.${label} — set it in profile.json (e.g. "cv": "Your_Name_CV.pdf")`);
+    return;
+  }
+  const p = join(root, 'assets', filename);
+  if (!existsSync(p)) {
+    errors.push(
+      `✖ missing required file: assets/${filename} (${label})\n` +
+        `  Copy your file there, e.g.:  cp ~/Downloads/your-file assets/${filename}`
+    );
+  }
+};
+needAsset('cv', data.site?.cv);
+needAsset('photo', data.site?.photo);
+if (errors.length) {
+  errors.forEach((e) => console.error(e));
+  process.exit(1);
+}
 
 (data.experience?.jobs || []).forEach((j, i) => {
   if (!j.badge) warnings.push(`⚠ experience.jobs[${i}] has no badge (e.g. "Current" or a headline metric)`);

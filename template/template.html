@@ -169,11 +169,12 @@
 </div>
 {{#if education.certs}}
 <div class="reveal">
-<p class="eyebrow">{{education.certsEyebrow}}</p>
+{{#if education.certsEyebrow}}<p class="eyebrow">{{education.certsEyebrow}}</p>{{/if}}
 <h2>{{education.certsHeading}}</h2>
 <ul class="certs">
 {{#each education.certs}}<li><strong>{{name}}</strong><span>{{year}}</span></li>{{/each}}
 </ul>
+{{#if education.noteHtml}}<p class="lede">{{{education.noteHtml}}}</p>{{/if}}
 </div>
 {{/if}}
 </div>

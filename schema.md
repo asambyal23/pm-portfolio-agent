@@ -30,7 +30,7 @@ Every field the template understands. Optional top-level sections are omitted en
   "cv": "Your_CV.pdf"
 }
 ```
-`url` — no trailing slash; used for canonical + og:url. `assetVersion` — bump to bust browser caches after changing styles/copy. `photo`/`cv` are filenames inside `assets/`.
+`url` — no trailing slash; used for canonical + og:url. `assetVersion` — bump to bust browser caches after changing styles/copy. `photo`/`cv` are filenames inside `assets/` — **both are required inputs**: the build exits `✖` if `assets/<photo>` or `assets/<cv>` is missing. Only two files are needed to start: the CV PDF and the profile picture.
 
 ## `seo`
 
@@ -128,7 +128,7 @@ Order: reverse-chronological. `badgeClass`: `"pill"` (blue) for the current role
 
 ## `education` (optional)
 
-`eyebrow`, `heading`, `degrees[]` (`{ degree, detail }`), optional `certsEyebrow`, `certsHeading`, `certs[]` (`{ name, year }`).
+`eyebrow`, `heading`, `degrees[]` (`{ degree, detail }`), optional `certsEyebrow`, `certsHeading`, `certs[]` (`{ name, year }`), optional `noteHtml` (short provenance note rendered under the cert list, e.g. issuer-confirmation status).
 
 ## `contact` / `footer`
 
