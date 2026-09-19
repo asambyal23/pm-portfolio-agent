@@ -4,6 +4,10 @@
 
 **Turn your resume into a professional Product Manager portfolio with an AI agent — and publish it to Cloudflare Pages with one command (free hosting).**
 
+> **⚠️ Hosting is a MANUAL step — pushing to GitHub does NOT publish your site.**
+> `git push` only updates the code. To go live you (a human) must run `npm run deploy`
+> or drag `dist/` into the Cloudflare dashboard. See [Deployment](#deployment) and the [wiki](wiki/Deployment.md).
+
 One JSON file holds your content. One command builds the site. One more publishes it. Zero npm dependencies.
 
 [Live demo](https://ankush-kumar.pages.dev) · [Data schema](schema.md) · [Agent skill](SKILL.md) · [Prompts](prompts/)
@@ -19,7 +23,7 @@ A **reusable portfolio template + AI agent skill** for Product Managers:
 - **Design** — a fast, dark-themed, recruiter-friendly single page (case studies, experience timeline, PM toolkit with tap-to-open deep-dives, teardowns, builds, education, contact). No framework, no build-time dependencies — hand-rolled CSS/JS.
 - **Content/presentation split** — *everything personal lives in one `profile.json`*. The template never contains your data.
 - **AI agent** — [`SKILL.md`](SKILL.md) + 7 task prompts teach any capable AI agent (Claude, ChatGPT, Cursor, …) to convert your raw resume into `profile.json`, write credible outcome-led copy, and **never fabricate a metric**.
-- **Publish** — one command (`npm run deploy`) puts your site on Cloudflare Pages; an optional GitHub Actions workflow can automate it (see [Deployment](#deployment)).
+- **Publish** — one **manual** command (`npm run deploy`) puts your site on Cloudflare Pages; `git push` never publishes (see [Deployment](#deployment)). An optional GitHub Actions workflow can automate it (see Deployment → Option C).
 
 ## Architecture
 
@@ -52,7 +56,6 @@ cd pm-portfolio-agent
 npm run build     # builds the bundled example (Ankush Kumar) so you can see it working
 npm run dev       # preview at http://localhost:8000
 ```
-
 Now make it yours:
 
 1. **Create your data file.** Give an AI agent your resume/LinkedIn text along with [`SKILL.md`](SKILL.md) and [`prompts/portfolio-builder.md`](prompts/portfolio-builder.md), or copy the example and edit by hand:
@@ -66,7 +69,7 @@ Now make it yours:
    npm run build      # renders dist/ from profile.json
    npm run dev        # http://localhost:8000
    ```
-4. **Publish:** `npx wrangler login` (one-time), then `npm run deploy` — your site is live (see [Deployment](#deployment)).
+4. **Publish (MANUAL step — you do this, not git):** `npx wrangler login` (one-time), then `npm run deploy` — your site is live (see [Deployment](#deployment)). Pushing to GitHub alone changes nothing on your URL.
 
 ## Commands
 
@@ -97,9 +100,22 @@ The agent's prime directive (see [`SKILL.md`](SKILL.md)): **never fabricate metr
 
 ## Deployment
 
+> **🚨 Manual step — read this first.**
+> Pushing to GitHub does **NOT** update your live site. The GitHub repo holds your *source*
+> (`profile.json`, `assets/`, template); Cloudflare Pages holds your *published site* (`dist/`).
+> Going live always requires one deliberate human action below — either the CLI deploy
+> (Option A) or the dashboard upload (Option B). The agent stops at a green local build;
+> only you can publish. Full walkthrough: [wiki/Deployment.md](wiki/Deployment.md).
+
 Publishing is **free and manual** — one command, no tokens, no secrets, no CI required. Cloudflare Pages' free plan includes unlimited bandwidth and requests, 500 builds/month, a free `yourname.pages.dev` URL, and free custom-domain SSL — no credit card needed to sign up.
 
-### Option A — One-command publish (recommended)
+| Action | Publishes the site? |
+|---|---|
+| `git push` | ❌ No — updates code only |
+| `npm run deploy` (after `wrangler login`) | ✅ Yes — deploys `dist/` to your `*.pages.dev` URL |
+| Dashboard → Upload `dist/` | ✅ Yes — same result, no CLI |
+
+### Option A — One-command publish (recommended, manual)
 
 ```bash
 npm run build           # render dist/ from profile.json
