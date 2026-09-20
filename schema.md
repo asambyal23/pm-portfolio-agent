@@ -65,6 +65,19 @@ Every field the template understands. Optional top-level sections are omitted en
 }
 ```
 
+### `profile.contactButtons[]`
+
+```json
+[
+  { "type": "email",    "style": "email",    "label": "Email Me",       "href": "mailto:you@example.com" },
+  { "type": "website",  "style": "ghost",    "label": "Live portfolio", "href": "https://yourname.pages.dev", "newTab": true },
+  { "type": "linkedin", "style": "linkedin", "label": "LinkedIn",       "href": "https://linkedin.com/in/you", "newTab": true },
+  { "type": "phone",    "style": "ghost",    "label": "+44 7700 900123", "href": "tel:+447700900123" },
+  { "type": "github",   "style": "ghost",    "label": "GitHub",         "href": "https://github.com/you", "newTab": true }
+]
+```
+`type` picks the icon (`email`, `phone`, `linkedin`, `github`, `download`, `website`); an unknown type warns and renders the label without an icon. The build warns whenever an `email` / `linkedin` / `phone` button disagrees with the `contact` block — the classic copy-the-example bug that would publish someone else's details. Order in the array = order on the page.
+
 ## `experience.jobs[]`
 
 ```json
@@ -144,7 +157,7 @@ Order: reverse-chronological. `badgeClass`: `"pill"` (blue) for the current role
   "line": "you@example.com - +44… - City, note"
 }
 ```
-`footer`: `{ "text": "Your Name, Role" }`.
+`footer`: `{ "text": "Your Name, Role" }`. The LinkedIn button in `contact` is **optional** — when `contact.linkedin` is absent the button is not rendered at all (the bundled example ships a dummy email and no LinkedIn, by design).
 
 ## `nav[]`
 

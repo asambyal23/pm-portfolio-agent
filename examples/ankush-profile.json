@@ -16,7 +16,7 @@
   },
   "profile": {
     "name": "Ankush Kumar",
-    "email": "asambyal23@gmail.com",
+    "email": "ankush.kumar@example.com",
     "eyebrow": "Senior Product Manager - AI Platforms - B2B SaaS",
     "heroHtml": "I turn customer insight into <em>platform bets</em> that pay.",
     "heroLedeHtml": "12 years building B2B SaaS in complex, high-stakes markets. For the last 4 years I've led AI platform product at Granicus: 0 to 40+ enterprise customers, launch cycles cut from <strong>14 weeks to 5</strong>, $2M in unlocked revenue.",
@@ -29,19 +29,13 @@
         "type": "email",
         "style": "email",
         "label": "Email Me",
-        "href": "mailto:asambyal23@gmail.com"
+        "href": "mailto:ankush.kumar@example.com"
       },
       {
-        "type": "phone",
+        "type": "website",
         "style": "ghost",
-        "label": "+91-9560283111",
-        "href": "tel:+919560283111"
-      },
-      {
-        "type": "linkedin",
-        "style": "linkedin",
-        "label": "LinkedIn",
-        "href": "https://linkedin.com/in/ankushkumar23",
+        "label": "Live portfolio",
+        "href": "https://ankush-kumar.pages.dev",
         "newTab": true
       }
     ],
@@ -694,11 +688,10 @@
     "eyebrow": "Open to what's next",
     "heading": "Let's build AI users can trust.",
     "lede": "Senior PM roles in AI platforms, agents and enterprise SaaS. Bengaluru or remote.",
-    "email": "asambyal23@gmail.com",
+    "email": "ankush.kumar@example.com",
     "emailLabel": "Email Me",
-    "linkedin": "https://linkedin.com/in/ankushkumar23",
     "cvLabel": "CV",
-    "line": "asambyal23@gmail.com - +91-9560283111 - Bengaluru, Open to Remote"
+    "line": "ankush.kumar@example.com (dummy) - Bengaluru, Open to Remote"
   },
   "footer": {
     "text": "Ankush Kumar, Senior PM, AI Platforms"

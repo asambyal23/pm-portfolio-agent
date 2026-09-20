@@ -202,7 +202,7 @@ If you want `git push` to deploy automatically, the bundled workflow (`.github/w
 
 ## The example site
 
-`examples/ankush-profile.json` generates the live demo: [ankush-kumar.pages.dev](https://ankush-kumar.pages.dev) — Ankush Kumar, Senior PM (AI Platforms). Its photo/CV ship in `assets/` purely as demo content; replace them with your own. `examples/test-jane-profile.json` is a minimal fixture used to test that optional sections and skill modals omit cleanly.
+`examples/ankush-profile.json` generates the live demo: [ankush-kumar.pages.dev](https://ankush-kumar.pages.dev) — Ankush Kumar, Senior PM (AI Platforms). Read it as a filled-in reference: its **contact details are dummy** (no real inbox or phone attached), and the only live link is a **Live portfolio** button pointing back at the demo itself — so you can see how a finished portfolio looks without anyone's personal contact being copied around. Its photo/CV ship in `assets/` purely as demo content; replace them with your own. `examples/test-jane-profile.json` is a minimal fixture used to test that optional sections and skill modals omit cleanly.
 
 ## Contributing
 

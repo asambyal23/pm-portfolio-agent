@@ -559,4 +559,28 @@ describe('build smoke tests', () => {
     assert.deepEqual(jsonLeaks, [], `profile JSON must never reach dist/, got: ${jsonLeaks.join(', ')}`);
   });
 
+  it('REUSE: the example profile ships dummy contacts and only the live-demo link', () => {
+    const raw = readFileSync(join(root, 'examples/ankush-profile.json'), 'utf8');
+    assert.ok(!/@gmail\.com/.test(raw), 'no personal inbox in the example');
+    assert.ok(!/tel:/.test(raw), 'no phone button in the example');
+    const d = JSON.parse(raw);
+    const types = d.profile.contactButtons.map((b) => b.type);
+    assert.deepEqual(types, ['email', 'website'], 'example shows a dummy email + the live demo link');
+    assert.match(d.profile.contactButtons[0].href, /@example\.com$/, 'RFC-2606 dummy email');
+    assert.match(d.profile.contactButtons[1].href, /^https:\/\/[a-z0-9-]+\.pages\.dev$/, 'live portfolio link kept');
+    assert.ok(!d.contact.linkedin, 'no personal LinkedIn in the example contact block');
+  });
+
+  it('REUSE: the example renders without a LinkedIn button when contact.linkedin is absent', () => {
+    try {
+      run(['--profile', 'examples/ankush-profile.json']);
+      const html = readFileSync(join(root, 'dist', 'index.html'), 'utf8');
+      assert.ok(!/btn-linkedin/.test(html), 'no LinkedIn button may render when contact.linkedin is absent');
+      assert.match(html, /Live portfolio/, 'the live-demo button renders');
+      assert.match(html, /ankush\.kumar@example\.com/, 'the dummy email renders');
+    } finally {
+      run([]); // restore the author build + meta
+    }
+  });
+
 });

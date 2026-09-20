@@ -34,8 +34,12 @@ journey end to end: `npm run build` → `npm run validate` → `npm run test` �
 
 ## Tips for first-time users
 
-- Search `profile.json` for `ankush`, `asambyal23`, `+91` before your first build —
-  the validator flags leftovers, but previewing is still the fastest check.
+- The bundled example (`examples/ankush-profile.json`) has **dummy contacts** —
+  no personal inbox, phone or LinkedIn — and its only live link is the demo site
+  itself, so copying it never leaks someone else's details.
+- After `npm run init --clean`, search your `profile.json` for leftover `TODO`
+  markers before your first build — the validator flags them, but previewing is
+  still the fastest check.
 - Run `npm run validate` after every edit; it is offline, instant, and never writes.
 - Two required files only: your CV and your photo in `assets/`, names must match
   `site.cv` / `site.photo` in `profile.json`.
