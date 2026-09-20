@@ -9,7 +9,7 @@
     "validate": "node build.mjs --dry",
     "dev": "node build.mjs && node serve.mjs",
     "preflight": "node preflight.mjs",
-    "deploy": "node preflight.mjs && node deploy.mjs",
+    "deploy": "node deploy.mjs",
     "test": "node --test test/build.test.mjs"
   },
   "engines": {

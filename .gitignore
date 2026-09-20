@@ -2,3 +2,5 @@ dist/
 node_modules/
 .DS_Store
 *.log
+# Provenance stamp written by build.mjs (machine-local, never committed)
+.build-meta.json

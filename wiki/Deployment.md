@@ -19,9 +19,9 @@ npx wrangler login      # one-time: opens your browser to log into Cloudflare
 npm run deploy          # publishes dist/ to Cloudflare Pages
 ```
 
-- First run creates the Pages project; the name comes from the `deploy` script in `package.json` (`--project-name=...`). Set it **before** the first publish to control your `*.pages.dev` URL.
+- First run creates the Pages project. The name comes from `CLOUDFLARE_PROJECT_NAME` (default `pm-portfolio`) — e.g. `CLOUDFLARE_PROJECT_NAME=ankush-kumar npm run deploy` targets the existing `ankush-kumar` project so your URL never changes.
 - Every later update is the same: `npm run build && npm run deploy`.
-- `npm run deploy` wraps `npx wrangler pages deploy dist` (downloads on demand). Prefer a token? Set `CLOUDFLARE_API_TOKEN` before running.
+- `npm run deploy` runs the preflight gate first (refuses a stale `dist/`) and wraps `npx wrangler pages deploy dist` (downloads on demand). Prefer a token? Set `CLOUDFLARE_API_TOKEN` before running. Use `--dry-run` to preview the exact wrangler command, `--allow-stale` to bypass the staleness gate once.
 
 ## Option B — Dashboard upload (manual, no CLI)
 

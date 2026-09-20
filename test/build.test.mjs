@@ -1,7 +1,7 @@
-import { describe, it } from 'node:test';
+import { describe, it, before } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
+import { readFileSync, writeFileSync, rmSync, symlinkSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import os from 'node:os';
@@ -9,7 +9,32 @@ import os from 'node:os';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const run = (args) => execFileSync('node', ['build.mjs', ...args], { cwd: root, encoding: 'utf8' });
 
+// Ephemeral port + stdout handshake: no fixed ports, no sleep()-based flake.
+// serve.mjs prints the ACTUAL bound port, so PORT=0 works for parallel/CI runs.
+const startServer = async () => {
+  const { spawn } = await import('node:child_process');
+  const child = spawn('node', ['serve.mjs'], { cwd: root, env: { ...process.env, PORT: '0' } });
+  const port = await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('serve.mjs did not report a port within 5s')), 5000);
+    let buf = '';
+    child.stdout.on('data', (d) => {
+      buf += d;
+      const m = buf.match(/http:\/\/[^:]+:(\d+)/);
+      if (m) {
+        clearTimeout(timer);
+        resolve(Number(m[1]));
+      }
+    });
+    child.on('exit', (code) => reject(new Error(`serve.mjs exited early (code ${code})`)));
+  });
+  return { child, port };
+};
+
 describe('build smoke tests', () => {
+  // Hermetic: guarantee dist/ + .build-meta.json exist before the preflight tests,
+  // so `npm test` passes on a fresh clone (and in CI, which tests before building).
+  before(() => run([]));
+
   it('minimal Jane fixture validates (optional sections omit cleanly)', () => {
     const out = run(['--profile', 'examples/test-jane-profile.json', '--dry']);
     assert.match(out, /is valid/, 'Jane fixture should validate');
@@ -83,7 +108,6 @@ describe('build smoke tests', () => {
   });
 
   it('QA: symlink escape outside dist/ is NOT served', async () => {
-    const { spawn } = await import('node:child_process');
     const outside = join(os.tmpdir(), `qa-outside-${Date.now()}.txt`);
     writeFileSync(outside, 'qa-secret-must-not-leak');
     const link = join(root, 'dist', 'qa-evil-link.html');
@@ -94,9 +118,7 @@ describe('build smoke tests', () => {
       rmSync(outside, { force: true });
       return; // Windows CI without symlink rights — skip, not fail
     }
-    const port = 18710;
-    const child = spawn('node', ['serve.mjs'], { cwd: root, env: { ...process.env, PORT: String(port) } });
-    await new Promise((r) => setTimeout(r, 900));
+    const { child, port } = await startServer();
     try {
       const res = await fetch(`http://127.0.0.1:${port}/qa-evil-link.html`);
       const body = await res.text();
@@ -110,10 +132,7 @@ describe('build smoke tests', () => {
   });
 
   it('QA: HEAD on missing file is 404, not 500', async () => {
-    const { spawn } = await import('node:child_process');
-    const port = 18711;
-    const child = spawn('node', ['serve.mjs'], { cwd: root, env: { ...process.env, PORT: String(port) } });
-    await new Promise((r) => setTimeout(r, 900));
+    const { child, port } = await startServer();
     try {
       const res = await fetch(`http://127.0.0.1:${port}/does-not-exist-qa.html`, { method: 'HEAD' });
       assert.equal(res.status, 404, 'missing file must 404');
@@ -124,15 +143,120 @@ describe('build smoke tests', () => {
   });
 
   it('QA: traversal /..%2f.. is blocked', async () => {
-    const { spawn } = await import('node:child_process');
-    const port = 18712;
-    const child = spawn('node', ['serve.mjs'], { cwd: root, env: { ...process.env, PORT: String(port) } });
-    await new Promise((r) => setTimeout(r, 900));
+    const { child, port } = await startServer();
     try {
       const res = await fetch(`http://127.0.0.1:${port}/..%2f..%2fpackage.json`);
       assert.equal(res.status, 404, 'traversal must 404');
     } finally {
       child.kill('SIGTERM');
+    }
+  });
+
+  it('QA: nested each/if blocks render without shared-regex corruption', () => {
+    const tpl = '{{#each items}}{{name}}:{{#if show}}[{{#each tags}}{{.}},{{/each}}]{{/if}}|{{/each}}';
+    const jb = join(root, 'examples', '.tmp-nest.json');
+    const jane = JSON.parse(readFileSync(join(root, 'examples/test-jane-profile.json'), 'utf8'));
+    jane.skills = { items: [{ id: 'x', kicker: 'k', title: 't', description: tpl, more: 'm' }] };
+    writeFileSync(jb, JSON.stringify(jane));
+    try {
+      const out = run(['--profile', 'examples/.tmp-nest.json', '--dry']);
+      assert.match(out, /is valid/, 'nested template must not throw');
+    } finally {
+      rmSync(jb, { force: true });
+    }
+  });
+
+  it('QA: dotfiles and backups never ship to dist', () => {
+    const junk = join(root, 'assets', '.tmp-junk.bak');
+    writeFileSync(junk, 'junk');
+    try {
+      run(['--profile', 'examples/test-jane-profile.json']);
+      assert.ok(!existsSync(join(root, 'dist', '.tmp-junk.bak')), 'backup must not ship');
+    } finally {
+      rmSync(junk, { force: true });
+      run([]);
+    }
+  });
+
+  it('QA: deploy wrapper rejects unknown flags and supports --dry-run', () => {
+    assert.throws(() => execFileSync('node', ['deploy.mjs', '--brancch'], { cwd: root, encoding: 'utf8' }), /unknown deploy flag/);
+    const out = execFileSync('node', ['deploy.mjs', '--dry-run'], { cwd: root, encoding: 'utf8', env: { ...process.env, CLOUDFLARE_PROJECT_NAME: 'qa-probe' } });
+    assert.match(out, /qa-probe/, 'dry-run names the project without deploying');
+  });
+
+  it('QA: deploy --dry-run keeps our flags out of wrangler args', () => {
+    try {
+      run(['--profile', 'examples/test-jane-profile.json']); // dist + meta from Jane
+      const out = execFileSync(
+        'node',
+        ['deploy.mjs', '--dry-run', '--profile', 'examples/test-jane-profile.json', '--branch=main'],
+        { cwd: root, encoding: 'utf8', env: { ...process.env, CLOUDFLARE_PROJECT_NAME: 'qa-probe' } }
+      );
+      const preview = out.split('\n').find((l) => l.includes('npx ')) || '';
+      assert.match(preview, /--branch=main/, 'real wrangler flags pass through');
+      assert.ok(!preview.includes('--profile'), 'our --profile must never reach wrangler (its global --profile means auth)');
+    } finally {
+      run([]); // restore profile.json build + meta
+    }
+  });
+
+  it('QA: deploy --allow-stale reaches the preflight gate', () => {
+    const metaP = join(root, '.build-meta.json');
+    const bak = readFileSync(metaP, 'utf8');
+    const meta = JSON.parse(bak);
+    meta.assets = { ...(meta.assets || {}), 'Ghost_File_QA.pdf': 'abc123' };
+    writeFileSync(metaP, JSON.stringify(meta));
+    try {
+      assert.throws(
+        () => execFileSync('node', ['deploy.mjs', '--dry-run'], { cwd: root, encoding: 'utf8' }),
+        /asset\(s\) changed since build/,
+        'deploy must inherit the preflight gate by default'
+      );
+      const out = execFileSync('node', ['deploy.mjs', '--dry-run', '--allow-stale'], { cwd: root, encoding: 'utf8' });
+      assert.match(out, /would deploy/, 'bypass must reach the gate through npm-style arg forwarding');
+    } finally {
+      writeFileSync(metaP, bak);
+    }
+  });
+
+  it('QA: --dry exits 0 with warnings (warnings are not failures)', () => {
+    const out = run(['--profile', 'examples/test-jane-profile.json', '--dry']);
+    assert.match(out, /is valid/, 'dry run greens with warnings present');
+  });
+
+  it('QA: preflight refuses asset drift (CV/photo/rubric changed after build)', () => {
+    const metaP = join(root, '.build-meta.json');
+    const bak = readFileSync(metaP, 'utf8');
+    const meta = JSON.parse(bak);
+    const firstAsset = Object.keys(meta.assets || {})[0];
+    assert.ok(firstAsset, 'meta records asset hashes');
+    meta.assets[firstAsset] = 'deadbeef'.repeat(8);
+    writeFileSync(metaP, JSON.stringify(meta));
+    try {
+      assert.throws(
+        () => execFileSync('node', ['preflight.mjs'], { cwd: root, encoding: 'utf8' }),
+        /asset\(s\) changed since build/,
+        'preflight must refuse drifted assets'
+      );
+    } finally {
+      writeFileSync(metaP, bak);
+    }
+  });
+
+  it('QA: preflight refuses a recorded asset that vanished', () => {
+    const metaP = join(root, '.build-meta.json');
+    const bak = readFileSync(metaP, 'utf8');
+    const meta = JSON.parse(bak);
+    meta.assets = { ...(meta.assets || {}), 'Ghost_File_QA.pdf': 'abc123' };
+    writeFileSync(metaP, JSON.stringify(meta));
+    try {
+      assert.throws(
+        () => execFileSync('node', ['preflight.mjs'], { cwd: root, encoding: 'utf8' }),
+        /asset\(s\) changed since build/,
+        'preflight must refuse a missing recorded asset'
+      );
+    } finally {
+      writeFileSync(metaP, bak);
     }
   });
 });

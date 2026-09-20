@@ -6,7 +6,9 @@ import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const dist = join(root, 'dist');
-const port = Number(process.env.PORT || 8000) || 8000;
+// PORT=0 is valid (OS-assigned ephemeral port) — tests use it to avoid collisions.
+const portRaw = process.env.PORT;
+const port = portRaw && Number.isInteger(Number(portRaw)) && Number(portRaw) >= 0 ? Number(portRaw) : 8000;
 const host = process.env.HOST || '127.0.0.1';
 
 const types = {
@@ -62,7 +64,11 @@ const server = createServer(async (req, res) => {
     res.end('404 — run `npm run build` first?');
   }
 });
-server.listen(port, host, () => console.log(`Portfolio running at http://${host}:${port}`));
+server.listen(port, host, () => {
+  // With PORT=0 the OS picks; print the ACTUAL bound port so scripts can parse it.
+  const bound = server.address().port;
+  console.log(`Portfolio running at http://${host}:${bound}`);
+});
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
     console.error(`✖ port ${port} in use — retry with PORT=8001 npm run dev`);

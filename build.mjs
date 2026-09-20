@@ -83,41 +83,43 @@ function lookup(ctx, path) {
 const TOKEN = /\{\{\{([^}]+)\}\}\}|\{\{([^}]+)\}\}/g;
 
 function render(tpl, ctx) {
+  const TOKEN_RE = () => new RegExp(TOKEN.source, 'g');
   let out = '';
   let last = 0;
+  const tokens = TOKEN_RE();
   let m;
-  TOKEN.lastIndex = 0;
-  while ((m = TOKEN.exec(tpl))) {
+  while ((m = tokens.exec(tpl))) {
     out += tpl.slice(last, m.index);
     if (m[1] !== undefined) {
       // raw (trusted HTML from profile data)
       const v = lookup(ctx, m[1].trim());
       out += v == null ? '' : String(v);
-      last = TOKEN.lastIndex;
+      last = tokens.lastIndex;
       continue;
     }
     // parse tag content: "#each expr", "/each", "expr", "."
     const raw = m[2].trim();
     let marker = '';
     let name = raw;
+    let expr = '';
     if (raw.startsWith('#') || raw.startsWith('/')) {
       marker = raw[0];
       const sp = raw.slice(1).trim().split(/\s+/);
       name = sp[0];
-      var expr = sp.slice(1).join(' ');
+      expr = sp.slice(1).join(' ');
     }
     if (marker === '') {
       const v = lookup(ctx, raw);
       out += v == null ? '' : escapeHtml(v);
-      last = TOKEN.lastIndex;
+      last = tokens.lastIndex;
       continue;
     }
     if (marker === '#') {
       if (!expr || !expr.length) throw new Error(`Block {{#${name}}} needs an expression, e.g. {{#${name} items}}`);
       const blockExpr = expr;
-      // find matching close tag (same name), honoring nesting
-      const scan = new RegExp(TOKEN.source, 'g');
-      scan.lastIndex = TOKEN.lastIndex;
+      // find matching close tag (same name), honoring nesting (fresh scanner: no shared lastIndex)
+      const scan = TOKEN_RE();
+      scan.lastIndex = tokens.lastIndex;
       const stack = [];
       let close;
       let found = false;
@@ -136,7 +138,7 @@ function render(tpl, ctx) {
         }
       }
       if (!close || !found) throw new Error(`Unclosed block {{#${name}}} — missing {{/${name}}}`);
-      const body = tpl.slice(TOKEN.lastIndex, close.index);
+      const body = tpl.slice(tokens.lastIndex, close.index);
       const val = lookup(ctx, blockExpr);
       const isObj = val && typeof val === 'object' && !Array.isArray(val);
       const child = val != null && typeof val === 'object' ? { ...ctx, ...val, '.': val } : { ...ctx, '.': val };
@@ -151,7 +153,7 @@ function render(tpl, ctx) {
         out += render(body, isObj ? child : { ...ctx, '.': val });
       }
       last = scan.lastIndex;
-      TOKEN.lastIndex = scan.lastIndex;
+      tokens.lastIndex = scan.lastIndex;
       continue;
     }
     throw new Error(`Unexpected closing tag {{/${name}}} in template`);
@@ -239,7 +241,8 @@ try {
 
 if (dry) {
   console.log(`✔ ${profilePath} is valid — template rendered (${(html.length / 1024).toFixed(1)} KB). Not written (--dry).`);
-  process.exit(warnings.length ? 2 : 0);
+  if (warnings.length) console.log(`  ${warnings.length} warning(s) — content suggestions, build still green.`);
+  process.exit(0);
 }
 
 /* ---------------- Emit dist/ ---------------- */
@@ -250,21 +253,45 @@ writeFileSync(join(dist, 'index.html'), html);
 copyFileSync(join(root, 'template', 'styles.css'), join(dist, 'styles.css'));
 copyFileSync(join(root, 'template', 'script.js'), join(dist, 'script.js'));
 
+const ASSET_ALLOW = new Set(['.jpg', '.jpeg', '.png', '.pdf', '.svg', '.ico', '.webp', '.html']);
+// Hashes of everything actually copied into dist/. preflight compares these so a
+// replaced CV/photo/rubric cannot be published from a stale dist/.
+const assetHashes = {};
 const assetsDir = join(root, 'assets');
 if (existsSync(assetsDir)) {
   for (const f of readdirSync(assetsDir)) {
-    if (statSync(join(assetsDir, f)).isFile()) copyFileSync(join(assetsDir, f), join(dist, f));
+    // Skip dotfiles/backups so *.bak, *~, .DS_Store never ship to dist/ or Cloudflare.
+    if (f.startsWith('.') || f.endsWith('~') || f.endsWith('.bak')) continue;
+    // Skip the generator sources for the evaluated CV (reportlab script + pypdf cache).
+    if (f === 'cv_build_full.py' || f === '__pycache__') continue;
+    const src = join(assetsDir, f);
+    let st;
+    try {
+      st = statSync(src);
+    } catch {
+      continue;
+    }
+    if (!st.isFile()) continue;
+    const ext = f.slice(f.lastIndexOf('.')).toLowerCase();
+    if (!ASSET_ALLOW.has(ext)) {
+      warnings.push(`⚠ assets/${f} skipped: extension ${ext || '(none)'} not in publish allow-list`);
+      continue;
+    }
+    copyFileSync(src, join(dist, f));
+    assetHashes[f] = createHash('sha256').update(readFileSync(src)).digest('hex');
   }
 }
 
-/* Provenance stamp: lets `npm run deploy` refuse a stale dist/ (P0 drift fix). */
+/* Provenance stamp: lets `npm run deploy` refuse a stale dist/.
+   Written BESIDE dist/ (not inside) so the hash file itself never uploads to Pages. */
 writeFileSync(
-  join(dist, '.build-meta.json'),
+  join(root, '.build-meta.json'),
   JSON.stringify(
     {
       profile: profilePath.split('/').slice(-1)[0],
       profileSha256: createHash('sha256').update(readFileSync(profilePath)).digest('hex'),
       assetVersion: data.site?.assetVersion ?? null,
+      assets: assetHashes,
       builtAt: new Date().toISOString(),
       node: process.version,
     },

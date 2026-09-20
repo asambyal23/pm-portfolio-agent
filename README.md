@@ -123,9 +123,11 @@ npx wrangler login      # one-time: opens your browser to log into Cloudflare
 npm run deploy          # publishes dist/ to Cloudflare Pages
 ```
 
-- The first `npm run deploy` creates the Pages project. It defaults to the project name `pm-portfolio`; to control your `*.pages.dev` URL, change the name in the `deploy` script in `package.json` (e.g. `--project-name=yourname`) **before** the first publish.
+- The first `npm run deploy` creates the Pages project. It defaults to `pm-portfolio`; to target **your** `*.pages.dev` URL set the project name explicitly:
+  `CLOUDFLARE_PROJECT_NAME=ankush-kumar npm run deploy` (or export it once in your shell profile).
 - **Every future update is the same two commands:** `npm run build && npm run deploy`.
-- `npm run deploy` is a thin wrapper around `npx wrangler pages deploy dist` — wrangler downloads on demand, nothing is installed. If you prefer an API token over browser login, set `CLOUDFLARE_API_TOKEN` in your shell before running it.
+- `npm run deploy` runs `preflight.mjs` first and **refuses a stale `dist/`** (anything in `profile.json` or `assets/` changed since the build) — rebuild, or bypass once with `--allow-stale`.
+- `npm run deploy` is a thin wrapper around `npx wrangler pages deploy dist` — wrangler downloads on demand, nothing is installed. If you prefer an API token over browser login, set `CLOUDFLARE_API_TOKEN` in your shell before running it. It accepts real `wrangler pages deploy` flags only (`--branch`, `--commit-hash`, `--commit-message`, `--commit-dirty`, `--skip-caching`, `--no-bundle`, `--upload-source-maps`); typos are rejected, and `--dry-run` previews the command without deploying.
 
 ### Option B — Dashboard drag-and-drop (no CLI)
 
