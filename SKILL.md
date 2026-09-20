@@ -20,7 +20,7 @@ cp ~/Downloads/Your_CV.pdf assets/Your_Name_CV.pdf
 cp ~/Downloads/you.jpg assets/profile.jpg
 ```
 
-Then point `site.cv` / `site.photo` in `profile.json` at those filenames. The build **fails fast** (`✖ missing required file`) if either is absent — by design, so nobody ships a portfolio with a broken Download-CV button or a missing photo.
+Then point `site.cv` / `site.photo` in `profile.json` at those filenames. The build **fails fast** (`✖ missing required file`) if either is absent — by design, so nobody ships a portfolio with a broken Download-CV button or a missing photo. Extra assets go in `assets/` too, but never name one `index.html`, `styles.css` or `script.js` (they would overwrite the built site — the build refuses them), and unknown file types are skipped with a warning. After copying the example profile, run `npm run validate`: leftover example contacts (email/phone/LinkedIn in `profile.contactButtons` that disagree with your own `contact` block) are flagged so the example author's details never go live on your site.
 Accept any mix of extra material (LinkedIn copy, project docs, reviews, conversation) on top, but the CV + photo are the non-negotiable two. Ask for missing information **only when it materially improves the portfolio** (see "What to ask for"). Never block on nice-to-haves.
 
 ### 2. Extract and structure

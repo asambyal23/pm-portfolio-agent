@@ -30,7 +30,7 @@ Every field the template understands. Optional top-level sections are omitted en
   "cv": "Your_CV.pdf"
 }
 ```
-`url` — no trailing slash; used for canonical + og:url. `assetVersion` — bump to bust browser caches after changing styles/copy. `photo`/`cv` are filenames inside `assets/` — **both are required inputs**: the build exits `✖` if `assets/<photo>` or `assets/<cv>` is missing. Only two files are needed to start: the CV PDF and the profile picture.
+`url` — no trailing slash; used for canonical + og:url. `assetVersion` — optional; the build appends a short hash of the shipped `styles.css`/`script.js` automatically, so any style or behaviour change busts browser caches even if you forget to bump it. `photo`/`cv` are filenames inside `assets/` — **both are required inputs**: the build exits `✖` if `assets/<photo>` or `assets/<cv>` is missing. Only two files are needed to start: the CV PDF and the profile picture. Asset filenames must not be `index.html`, `styles.css` or `script.js` (those are the built site's own files — the build refuses them), and unknown extensions are skipped with a warning.
 
 ## `seo`
 

@@ -9,7 +9,7 @@
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -41,7 +41,7 @@ try {
   fail('.build-meta.json is not valid JSON.');
 }
 const builtName = meta.profile || '(unknown)';
-const wantName = profilePath.split('/').slice(-1)[0];
+const wantName = basename(profilePath);
 if (builtName !== wantName) fail(`dist/ was built from ${builtName}, but deploy targets ${wantName}. Rebuild with the same --profile.`);
 if (!existsSync(profilePath)) fail(`profile not found: ${profilePath}`);
 const current = createHash('sha256').update(readFileSync(profilePath)).digest('hex');

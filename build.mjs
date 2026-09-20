@@ -33,19 +33,45 @@ import {
   rmSync,
 } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = dirname(fileURLToPath(import.meta.url));
 
 /* ---------------- CLI args ---------------- */
 const args = process.argv.slice(2);
+const USAGE = 'usage: node build.mjs [--profile <file>] [--dry|--dry-run]';
+// Strict flags: a typo like `--profil x.json` must fail loudly, not silently
+// build the DEFAULT profile and publish the wrong site.
+const VALUE_FLAGS = new Set(['profile']);
+const BOOL_FLAGS = new Set(['dry', 'dry-run']);
+for (let i = 0; i < args.length; i++) {
+  const a = args[i];
+  if (!a.startsWith('--')) continue;
+  const name = a.replace(/^--/, '').split('=')[0];
+  if (VALUE_FLAGS.has(name)) {
+    if (!a.includes('=') && !(args[i + 1] && !args[i + 1].startsWith('--'))) {
+      console.error(`✖ --${name} needs a value, e.g. --${name} profile.json`);
+      process.exit(1);
+    }
+    if (!a.includes('=')) i += 1;
+    continue;
+  }
+  if (!BOOL_FLAGS.has(name)) {
+    console.error(`✖ unknown flag: ${a}`);
+    console.error(`  ${USAGE}`);
+    process.exit(1);
+  }
+}
 const getArg = (name) => {
+  const inline = args.find((a) => a.startsWith(`--${name}=`));
+  if (inline) return inline.slice(name.length + 3) || null;
   const i = args.indexOf(`--${name}`);
-  return i !== -1 && args[i + 1] ? args[i + 1] : null;
+  return i !== -1 && args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : null;
 };
-const hasFlag = (name) => args.includes(`--${name}`);
-const dry = hasFlag('dry');
+// `--dry-run` is the flag deploy.mjs uses; accepting it here avoids the silent
+// surprise of `npm run build -- --dry-run` writing dist/.
+const dry = args.includes('--dry') || args.includes('--dry-run');
 
 /* ---------------- Load profile ---------------- */
 const profileArg = getArg('profile');
@@ -195,9 +221,40 @@ const needAsset = (label, filename) => {
 needAsset('cv', data.site?.cv);
 needAsset('photo', data.site?.photo);
 
+/* Asset hygiene — runs on EVERY run (including --dry) so a bad file never ships.
+   - Reserved names would overwrite the built site (assets/index.html clobbering
+     the portfolio was possible because assets are copied after the template).
+   - Unknown extensions would be published raw, unreviewed. */
+const ASSET_DIR = join(root, 'assets');
+const ASSET_ALLOW = new Set(['.jpg', '.jpeg', '.png', '.pdf', '.svg', '.ico', '.webp', '.html']);
+const RESERVED_OUTPUTS = new Set(['index.html', 'styles.css', 'script.js']);
+const isInternalAsset = (f) =>
+  f.startsWith('.') || f.endsWith('~') || f.endsWith('.bak') || f.startsWith('qa-fixture-') ||
+  f === 'cv_build_full.py' || f === '__pycache__';
+const listAssetFiles = () => {
+  if (!existsSync(ASSET_DIR)) return [];
+  const out = [];
+  for (const f of readdirSync(ASSET_DIR)) {
+    if (isInternalAsset(f)) continue;
+    try {
+      if (statSync(join(ASSET_DIR, f)).isFile()) out.push(f);
+    } catch {
+      /* broken symlink — skip here; preflight flags it if it was ever published */
+    }
+  }
+  return out;
+};
+for (const f of listAssetFiles()) {
+  if (RESERVED_OUTPUTS.has(f)) {
+    errors.push(`✖ assets/${f} would overwrite the built site — rename it (e.g. artifact-name.html) or keep it outside assets/.`);
+    continue;
+  }
+  const ext = f.slice(f.lastIndexOf('.')).toLowerCase();
+  if (!ASSET_ALLOW.has(ext)) warnings.push(`⚠ assets/${f} skipped: extension ${ext || '(none)'} not in publish allow-list`);
+}
+
 /* Friendly type errors instead of raw stack traces — this tool is used by PMs,
    not only devs, so a wrong-typed field must name the field and the fix. */
-const at = (dotPath) => dotPath.split('.').reduce((o, k) => (o == null ? undefined : o[k]), data);
 const wantArray = (v, path) => {
   if (v == null) return [];
   if (!Array.isArray(v)) {
@@ -206,7 +263,21 @@ const wantArray = (v, path) => {
   }
   return v;
 };
-const ARR = (dotPath) => wantArray(at(dotPath), dotPath);
+// Walk intermediate segments too: {"skills": "none"} used to be silently skipped
+// (a string has no .items), which rendered an empty section header.
+const ARR = (dotPath) => {
+  const parts = dotPath.split('.');
+  let cur = data;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const v = cur == null ? undefined : cur[parts[i]];
+    if (v !== undefined && v !== null && (typeof v !== 'object' || Array.isArray(v))) {
+      errors.push(`✖ ${parts.slice(0, i + 1).join('.')} must be an object, found ${typeof v}. See schema.md for the shape.`);
+      return [];
+    }
+    cur = v;
+  }
+  return wantArray(cur == null ? undefined : cur[parts[parts.length - 1]], dotPath);
+};
 // Validate every section array the template iterates, even where JS does not.
 [
   'nav', 'profile.stats', 'profile.tags', 'profile.contactButtons',
@@ -272,6 +343,16 @@ for (const b of ARR('profile.contactButtons')) {
 if (errors.length) process.exit(1);
 
 /* ---------------- Render ---------------- */
+/* Cache-busting: a manual site.assetVersion is easy to forget, and visitors then
+   get last week's CSS/JS after a deploy. Mix in a short hash of the CSS/JS actually
+   shipped so any style/behaviour change busts browser caches automatically. */
+const styleHash = createHash('sha256')
+  .update(readFileSync(join(root, 'template', 'styles.css')))
+  .update(readFileSync(join(root, 'template', 'script.js')))
+  .digest('hex')
+  .slice(0, 8);
+const configuredVersion = data.site?.assetVersion;
+data.site = { ...(data.site || {}), assetVersion: configuredVersion ? `${configuredVersion}-${styleHash}` : styleHash };
 const template = readFileSync(join(root, 'template', 'template.html'), 'utf8');
 let html;
 try {
@@ -295,36 +376,15 @@ writeFileSync(join(dist, 'index.html'), html);
 copyFileSync(join(root, 'template', 'styles.css'), join(dist, 'styles.css'));
 copyFileSync(join(root, 'template', 'script.js'), join(dist, 'script.js'));
 
-const ASSET_ALLOW = new Set(['.jpg', '.jpeg', '.png', '.pdf', '.svg', '.ico', '.webp', '.html']);
 // Hashes of everything actually copied into dist/. preflight compares these so a
 // replaced CV/photo/rubric cannot be published from a stale dist/.
 const assetHashes = {};
-const assetsDir = join(root, 'assets');
-if (existsSync(assetsDir)) {
-  for (const f of readdirSync(assetsDir)) {
-    // Skip dotfiles/backups so *.bak, *~, .DS_Store never ship to dist/ or Cloudflare.
-    if (f.startsWith('.') || f.endsWith('~') || f.endsWith('.bak')) continue;
-    // Skip test fixtures: npm test creates assets/qa-fixture-* for the Jane profile.
-    // They must never reach dist/, and a crashed test run cannot leak them there.
-    if (f.startsWith('qa-fixture-')) continue;
-    // Skip the generator sources for the evaluated CV (reportlab script + pypdf cache).
-    if (f === 'cv_build_full.py' || f === '__pycache__') continue;
-    const src = join(assetsDir, f);
-    let st;
-    try {
-      st = statSync(src);
-    } catch {
-      continue;
-    }
-    if (!st.isFile()) continue;
-    const ext = f.slice(f.lastIndexOf('.')).toLowerCase();
-    if (!ASSET_ALLOW.has(ext)) {
-      warnings.push(`⚠ assets/${f} skipped: extension ${ext || '(none)'} not in publish allow-list`);
-      continue;
-    }
-    copyFileSync(src, join(dist, f));
-    assetHashes[f] = createHash('sha256').update(readFileSync(src)).digest('hex');
-  }
+for (const f of listAssetFiles()) {
+  if (RESERVED_OUTPUTS.has(f)) continue; // already failed validation above
+  const src = join(ASSET_DIR, f);
+  if (!ASSET_ALLOW.has(f.slice(f.lastIndexOf('.')).toLowerCase())) continue;
+  copyFileSync(src, join(dist, f));
+  assetHashes[f] = createHash('sha256').update(readFileSync(src)).digest('hex');
 }
 
 /* Provenance stamp: lets `npm run deploy` refuse a stale dist/.
@@ -333,9 +393,10 @@ writeFileSync(
   join(root, '.build-meta.json'),
   JSON.stringify(
     {
-      profile: profilePath.split('/').slice(-1)[0],
+      profile: basename(profilePath),
       profileSha256: createHash('sha256').update(readFileSync(profilePath)).digest('hex'),
-      assetVersion: data.site?.assetVersion ?? null,
+      assetVersion: configuredVersion ?? null,
+      cacheBust: styleHash,
       assets: assetHashes,
       builtAt: new Date().toISOString(),
       node: process.version,

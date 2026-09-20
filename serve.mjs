@@ -20,6 +20,7 @@ const types = {
   '.jpeg': 'image/jpeg',
   '.png': 'image/png',
   '.svg': 'image/svg+xml',
+  '.webp': 'image/webp',
   '.pdf': 'application/pdf',
   '.ico': 'image/x-icon',
 };

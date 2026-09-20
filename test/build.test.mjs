@@ -374,4 +374,76 @@ describe('build smoke tests', () => {
       rmSync(tmp, { force: true });
     }
   });
+
+  it('QA: build rejects unknown flags instead of silently using ./profile.json', () => {
+    assert.throws(
+      () => execFileSync('node', ['build.mjs', '--profil', 'x.json'], { cwd: root, encoding: 'utf8' }),
+      /unknown flag: --profil/,
+      'a typo like --profil must fail loudly'
+    );
+    assert.throws(
+      () => execFileSync('node', ['build.mjs', '--profile'], { cwd: root, encoding: 'utf8' }),
+      /needs a value/,
+      '--profile without a value must fail loudly'
+    );
+  });
+
+  it('QA: --dry-run never writes dist/ (flag deploy.mjs relies on)', () => {
+    const idx = join(root, 'dist', 'index.html');
+    const before = readFileSync(idx, 'utf8');
+    const out = run(['--dry-run']);
+    assert.match(out, /Not written \(--dry\)/);
+    assert.equal(readFileSync(idx, 'utf8'), before, '--dry-run must not touch dist/');
+  });
+
+  it('QA: reserved asset names fail the build (assets/index.html would overwrite the site)', () => {
+    const reserved = join(root, 'assets', 'index.html');
+    writeFileSync(reserved, '<h1>should never ship</h1>');
+    try {
+      assert.throws(
+        () => execFileSync('node', ['build.mjs'], { cwd: root, encoding: 'utf8' }),
+        /assets\/index\.html would overwrite the built site/,
+        'reserved asset names must be rejected'
+      );
+    } finally {
+      rmSync(reserved, { force: true });
+      run([]); // restore a clean dist/ + meta
+    }
+  });
+
+  it('QA: wrong-typed parent section gets a friendly error, not a crash', () => {
+    const jane = JSON.parse(readFileSync(join(root, 'examples/test-jane-profile.json'), 'utf8'));
+    jane.skills = 'none'; // string where an object is expected
+    const tmp = join(root, 'examples', '.tmp-parent-type.json');
+    writeFileSync(tmp, JSON.stringify(jane));
+    try {
+      const r = spawnSync('node', ['build.mjs', '--profile', 'examples/.tmp-parent-type.json', '--dry'], {
+        cwd: root,
+        encoding: 'utf8',
+      });
+      assert.notEqual(r.status, 0, 'must fail');
+      assert.match(`${r.stdout}${r.stderr}`, /skills must be an object, found string/);
+      assert.doesNotMatch(`${r.stderr}`, /at .*build\.mjs:\d+/s, 'no raw stack trace');
+    } finally {
+      rmSync(tmp, { force: true });
+    }
+  });
+
+  it('QA: cache-bust hash is embedded and changes when CSS changes', () => {
+    const meta = JSON.parse(readFileSync(join(root, '.build-meta.json'), 'utf8'));
+    assert.match(meta.cacheBust || '', /^[0-9a-f]{8}$/, 'meta records the css/js hash');
+    const idx = join(root, 'dist', 'index.html');
+    assert.match(readFileSync(idx, 'utf8'), new RegExp(`\\?v=[^"']*${meta.cacheBust}`), 'index.html embeds the hash');
+    const css = join(root, 'template', 'styles.css');
+    const bak = readFileSync(css, 'utf8');
+    try {
+      writeFileSync(css, bak + '\n/* qa cache-bust probe */\n');
+      run([]);
+      const meta2 = JSON.parse(readFileSync(join(root, '.build-meta.json'), 'utf8'));
+      assert.notEqual(meta2.cacheBust, meta.cacheBust, 'hash must change with CSS');
+    } finally {
+      writeFileSync(css, bak);
+      run([]); // restore dist/ + meta for whatever runs next
+    }
+  });
 });
