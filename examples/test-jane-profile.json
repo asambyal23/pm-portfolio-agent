@@ -4,8 +4,8 @@
     "url": "https://jane-doe.pages.dev",
     "assetVersion": "1",
     "initials": "JD",
-    "photo": "profile.jpg",
-    "cv": "Ankush_Kumar_CV.pdf"
+    "photo": "qa-fixture-photo.jpg",
+    "cv": "qa-fixture-cv.pdf"
   },
   "seo": {
     "title": "Jane Doe - Product Manager, Fintech",

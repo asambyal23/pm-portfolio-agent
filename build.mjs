@@ -194,27 +194,41 @@ const needAsset = (label, filename) => {
 };
 needAsset('cv', data.site?.cv);
 needAsset('photo', data.site?.photo);
-if (errors.length) {
-  errors.forEach((e) => console.error(e));
-  process.exit(1);
-}
 
-(data.experience?.jobs || []).forEach((j, i) => {
+/* Friendly type errors instead of raw stack traces — this tool is used by PMs,
+   not only devs, so a wrong-typed field must name the field and the fix. */
+const at = (dotPath) => dotPath.split('.').reduce((o, k) => (o == null ? undefined : o[k]), data);
+const wantArray = (v, path) => {
+  if (v == null) return [];
+  if (!Array.isArray(v)) {
+    errors.push(`✖ ${path} must be an array, found ${typeof v} (${JSON.stringify(v).slice(0, 40)}). See schema.md for the shape.`);
+    return [];
+  }
+  return v;
+};
+const ARR = (dotPath) => wantArray(at(dotPath), dotPath);
+// Validate every section array the template iterates, even where JS does not.
+[
+  'nav', 'profile.stats', 'profile.tags', 'profile.contactButtons',
+  'experience.jobs', 'caseStudies.items', 'skills.items', 'teardowns.items',
+  'builds.items', 'education.degrees', 'education.certs',
+].forEach(ARR);
+
+ARR('experience.jobs').forEach((j, i) => {
   if (!j.badge) warnings.push(`⚠ experience.jobs[${i}] has no badge (e.g. "Current" or a headline metric)`);
-  (j.bullets || []).forEach((b, k) => {
+  wantArray(j.bullets, `experience.jobs[${i}].bullets`).forEach((b, k) => {
     if (!/\d/.test(b)) warnings.push(`⚠ experience.jobs[${i}] bullet ${k + 1} has no number — recruiters look for measurable outcomes`);
   });
 });
-(data.caseStudies?.items || []).forEach((c, i) => {
+ARR('caseStudies.items').forEach((c, i) => {
   if (!c.outcome) warnings.push(`⚠ caseStudies.items[${i}] "${c.title}" has no outcome metric`);
-  if (!(c.details || []).some((d) => d.label === 'Impact')) {
+  if (!wantArray(c.details, `caseStudies.items[${i}].details`).some((d) => d.label === 'Impact')) {
     warnings.push(`⚠ caseStudies.items[${i}] "${c.title}" has no Impact detail`);
   }
 });
-(data.profile?.stats || []).forEach((s, i) => {
+ARR('profile.stats').forEach((s, i) => {
   if (!s.label) warnings.push(`⚠ profile.stats[${i}] missing label`);
 });
-warnings.forEach((w) => console.error(w));
 
 /* ---------------- Inject icon SVGs for known contact-button types ---------------- */
 const ICONS = {
@@ -224,10 +238,38 @@ const ICONS = {
   download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>',
   github: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.93c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.54-3.88-1.54-.53-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>',
 };
-(data.profile?.contactButtons || []).forEach((b) => {
+ARR('profile.contactButtons').forEach((b) => {
   b.icon = ICONS[b.type] || '';
   if (!b.icon) warnings.push(`⚠ profile.contactButtons: unknown type "${b.type}" (known: ${Object.keys(ICONS).join(', ')})`);
 });
+
+/* Leftover-contact guard — the #1 copy-the-example mistake is editing `contact`
+   but forgetting `profile.contactButtons`, which publishes the EXAMPLE author's
+   email/phone/LinkedIn on your live site. Warn whenever a button disagrees. */
+const normUrl = (u) => String(u).replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/\/+$/, '').toLowerCase();
+const contact = data.contact || {};
+const contactText = JSON.stringify(contact);
+for (const b of ARR('profile.contactButtons')) {
+  const href = String(b.href || '');
+  if (b.type === 'email') {
+    const addr = href.replace(/^mailto:/i, '').trim();
+    if (addr && contact.email && addr.toLowerCase() !== String(contact.email).toLowerCase())
+      warnings.push(`⚠ profile.contactButtons: email button is "${addr}" but contact.email is "${contact.email}" — update or delete the button.`);
+  } else if (b.type === 'linkedin') {
+    if (href && contact.linkedin && normUrl(href) !== normUrl(contact.linkedin))
+      warnings.push(`⚠ profile.contactButtons: LinkedIn button is "${href}" but contact.linkedin is "${contact.linkedin}" — update or delete the button.`);
+  } else if (b.type === 'phone') {
+    const digits = href.replace(/\D/g, '');
+    if (digits && !contactText.replace(/\D/g, '').includes(digits))
+      warnings.push(`⚠ profile.contactButtons: phone "${b.label || href}" appears nowhere in your contact details — if it came from the example profile, update or delete it.`);
+  }
+}
+
+// Print AFTER every check above: messages pushed later would otherwise be dropped.
+// Dedupe: a field can be validated by both the section pass and inline usage.
+[...new Set(errors)].forEach((e) => console.error(e));
+[...new Set(warnings)].forEach((w) => console.error(w));
+if (errors.length) process.exit(1);
 
 /* ---------------- Render ---------------- */
 const template = readFileSync(join(root, 'template', 'template.html'), 'utf8');
@@ -262,6 +304,9 @@ if (existsSync(assetsDir)) {
   for (const f of readdirSync(assetsDir)) {
     // Skip dotfiles/backups so *.bak, *~, .DS_Store never ship to dist/ or Cloudflare.
     if (f.startsWith('.') || f.endsWith('~') || f.endsWith('.bak')) continue;
+    // Skip test fixtures: npm test creates assets/qa-fixture-* for the Jane profile.
+    // They must never reach dist/, and a crashed test run cannot leak them there.
+    if (f.startsWith('qa-fixture-')) continue;
     // Skip the generator sources for the evaluated CV (reportlab script + pypdf cache).
     if (f === 'cv_build_full.py' || f === '__pycache__') continue;
     const src = join(assetsDir, f);

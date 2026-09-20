@@ -1,13 +1,18 @@
-import { describe, it, before } from 'node:test';
+import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, rmSync, symlinkSync, existsSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
+import { readFileSync, writeFileSync, rmSync, readdirSync, symlinkSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import os from 'node:os';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const run = (args) => execFileSync('node', ['build.mjs', ...args], { cwd: root, encoding: 'utf8' });
+// warnings go to stderr, the success line to stdout — capture both for assertions
+const runBoth = (args) => {
+  const r = spawnSync('node', ['build.mjs', ...args], { cwd: root, encoding: 'utf8' });
+  return `${r.stdout || ''}${r.stderr || ''}`;
+};
 
 // Ephemeral port + stdout handshake: no fixed ports, no sleep()-based flake.
 // serve.mjs prints the ACTUAL bound port, so PORT=0 works for parallel/CI runs.
@@ -31,9 +36,34 @@ const startServer = async () => {
 };
 
 describe('build smoke tests', () => {
+  // Fixture assets for examples/test-jane-profile.json. Owned by the tests, never
+  // the user's files — a fork that replaces assets/ (the documented flow) still
+  // passes `npm test`. build.mjs skips qa-fixture-* so they can never be published.
+  const fixtureAssets = ['qa-fixture-cv.pdf', 'qa-fixture-photo.jpg'];
+  const writeFixtures = () => {
+    for (const f of fixtureAssets) {
+      const p = join(root, 'assets', f);
+      if (!existsSync(p)) writeFileSync(p, f.endsWith('.pdf') ? '%PDF-1.4\n% qa fixture\n' : 'qa-fixture');
+    }
+  };
+  const removeFixtures = () => {
+    for (const f of fixtureAssets) rmSync(join(root, 'assets', f), { force: true });
+  };
+
   // Hermetic: guarantee dist/ + .build-meta.json exist before the preflight tests,
   // so `npm test` passes on a fresh clone (and in CI, which tests before building).
-  before(() => run([]));
+  before(() => {
+    removeFixtures(); // a crashed earlier run must not skew the user's build
+    writeFixtures();
+    run([]);
+  });
+
+  // Leave the repo deployable: drop fixtures, then rebuild from the user's own
+  // profile.json so dist/ + .build-meta.json describe THEIR site, not the fixture.
+  after(() => {
+    removeFixtures();
+    run([]);
+  });
 
   it('minimal Jane fixture validates (optional sections omit cleanly)', () => {
     const out = run(['--profile', 'examples/test-jane-profile.json', '--dry']);
@@ -73,6 +103,54 @@ describe('build smoke tests', () => {
       rmSync(tmp, { force: true });
     }
   });
+  it('QA: stale contactButtons copied from the example are flagged', () => {
+    const jane = JSON.parse(readFileSync(join(root, 'examples/test-jane-profile.json'), 'utf8'));
+    jane.profile.contactButtons = [
+      { type: 'email', label: 'Email Me', href: 'mailto:someone.else@example.org' },
+      { type: 'linkedin', label: 'LinkedIn', href: 'https://linkedin.com/in/someone-else' },
+      { type: 'phone', label: '+44-0000000000', href: 'tel:+440000000000' },
+    ];
+    const tmp = join(root, 'examples', '.tmp-stale-buttons.json');
+    writeFileSync(tmp, JSON.stringify(jane));
+    try {
+      const out = runBoth(['--profile', 'examples/.tmp-stale-buttons.json', '--dry']);
+      assert.match(out, /email button is "someone\.else@example\.org" but contact\.email/, 'stale email flagged');
+      assert.match(out, /LinkedIn button is "https:\/\/linkedin\.com\/in\/someone-else"/, 'stale LinkedIn flagged');
+      assert.match(out, /phone ".*" appears nowhere in your contact details/, 'unverifiable phone flagged');
+    } finally {
+      rmSync(tmp, { force: true });
+    }
+  });
+
+  it('QA: matching contactButtons produce no leftover warnings', () => {
+    const jane = JSON.parse(readFileSync(join(root, 'examples/test-jane-profile.json'), 'utf8'));
+    jane.profile.contactButtons = [
+      { type: 'email', label: 'Email Me', href: 'mailto:jane@example.com' },
+      { type: 'linkedin', label: 'LinkedIn', href: 'https://www.linkedin.com/in/jane/' }, // www + trailing slash
+    ];
+    const tmp = join(root, 'examples', '.tmp-good-buttons.json');
+    writeFileSync(tmp, JSON.stringify(jane));
+    try {
+      const out = runBoth(['--profile', 'examples/.tmp-good-buttons.json', '--dry']);
+      assert.doesNotMatch(out, /contactButtons: (email|LinkedIn|phone) button/, 'matching buttons must stay quiet');
+    } finally {
+      rmSync(tmp, { force: true });
+    }
+  });
+
+  it('QA: test fixtures never ship to dist/', () => {
+    try {
+      run(['--profile', 'examples/test-jane-profile.json']);
+      const listed = readdirSync(join(root, 'dist'));
+      assert.ok(
+        !listed.some((f) => f.startsWith('qa-fixture-')),
+        `fixture files must never reach dist/, got: ${listed.join(', ')}`
+      );
+    } finally {
+      run([]); // restore the user's real dist/ + meta
+    }
+  });
+
 
   it('preflight passes on a fresh build', () => {
     const out = execFileSync('node', ['preflight.mjs'], { cwd: root, encoding: 'utf8' });
@@ -257,6 +335,43 @@ describe('build smoke tests', () => {
       );
     } finally {
       writeFileSync(metaP, bak);
+    }
+  });
+
+  it('user-UX: wrong-typed section gives a friendly error, not a stack trace', () => {
+    const jane = JSON.parse(readFileSync(join(root, 'examples/test-jane-profile.json'), 'utf8'));
+    const bad = { ...jane, profile: { ...jane.profile, stats: '8 years' } };
+    const tmp = join(root, 'examples', '.tmp-bad-type.json');
+    writeFileSync(tmp, JSON.stringify(bad));
+    try {
+      const r = spawnSync('node', ['build.mjs', '--profile', 'examples/.tmp-bad-type.json', '--dry'], {
+        cwd: root,
+        encoding: 'utf8',
+      });
+      const out = `${r.stdout || ''}${r.stderr || ''}`;
+      assert.strictEqual(r.status, 1, 'must exit 1');
+      assert.match(out, /profile\.stats must be an array, found string/, 'names the field and the actual type');
+      assert.doesNotMatch(out, /TypeError|at (Object|Module)\./, 'no raw Node stack trace for end users');
+    } finally {
+      rmSync(tmp, { force: true });
+    }
+  });
+
+  it('user-UX: malformed JSON names the file and line, no stack trace', () => {
+    const jane = readFileSync(join(root, 'examples/test-jane-profile.json'), 'utf8');
+    const tmp = join(root, 'examples', '.tmp-bad-json.json');
+    writeFileSync(tmp, jane.slice(0, jane.length - 4) + ',}');
+    try {
+      const r = spawnSync('node', ['build.mjs', '--profile', 'examples/.tmp-bad-json.json', '--dry'], {
+        cwd: root,
+        encoding: 'utf8',
+      });
+      const out = `${r.stdout || ''}${r.stderr || ''}`;
+      assert.strictEqual(r.status, 1);
+      assert.match(out, /Could not parse .*\.tmp-bad-json\.json/, 'names the file');
+      assert.doesNotMatch(out, /SyntaxError|at JSON\.parse/, 'no raw parser stack');
+    } finally {
+      rmSync(tmp, { force: true });
     }
   });
 });
