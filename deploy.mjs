@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- * Deploy wrapper (P1 fix): project name comes from env, not hardcoded personal URL.
- *   CLOUDFLARE_PROJECT_NAME=ankush-kumar npm run deploy   # your live site
+ * Deploy wrapper: project name comes from env, not hardcoded personal URL.
+ *   CLOUDFLARE_PROJECT_NAME=ankush-kumar npm run deploy   # a live site
  *   npm run deploy                                        # default: pm-portfolio
- * Forwards extra args to wrangler (e.g. --allow-stale is consumed by preflight;
- * anything else passes through).
+ * Forwards extra args to wrangler. NOTE: `npm run deploy -- --profile X`
+ * forwards --profile to preflight AND build; use `npm run deploy -- --profile X`
+ * only together with a matching `npm run build -- --profile X` first.
  */
 import { spawnSync } from 'node:child_process';
 

@@ -1,9 +1,10 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, rmSync, symlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import os from 'node:os';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const run = (args) => execFileSync('node', ['build.mjs', ...args], { cwd: root, encoding: 'utf8' });
@@ -45,6 +46,93 @@ describe('build smoke tests', () => {
         'build must refuse a missing CV');
     } finally {
       rmSync(tmp, { force: true });
+    }
+  });
+
+  it('preflight passes on a fresh build', () => {
+    const out = execFileSync('node', ['preflight.mjs'], { cwd: root, encoding: 'utf8' });
+    assert.match(out, /deploy preflight/, 'preflight should pass');
+  });
+
+  it('preflight refuses a stale dist', () => {
+    const prof = join(root, 'profile.json');
+    const bak = readFileSync(prof, 'utf8');
+    const d = JSON.parse(bak);
+    d.site.assetVersion = 'STALE-QA-PROBE';
+    writeFileSync(prof, JSON.stringify(d));
+    try {
+      assert.throws(() => execFileSync('node', ['preflight.mjs'], { cwd: root, encoding: 'utf8' }), /stale/,
+        'preflight must refuse stale dist');
+    } finally {
+      writeFileSync(prof, bak);
+    }
+  });
+
+  it('preflight --allow-stale bypasses the hash check', () => {
+    const prof = join(root, 'profile.json');
+    const bak = readFileSync(prof, 'utf8');
+    const d = JSON.parse(bak);
+    d.site.assetVersion = 'STALE-QA-PROBE';
+    writeFileSync(prof, JSON.stringify(d));
+    try {
+      const out = execFileSync('node', ['preflight.mjs', '--allow-stale'], { cwd: root, encoding: 'utf8' });
+      assert.match(out, /deploy preflight/, 'bypass should pass');
+    } finally {
+      writeFileSync(prof, bak);
+    }
+  });
+
+  it('QA: symlink escape outside dist/ is NOT served', async () => {
+    const { spawn } = await import('node:child_process');
+    const outside = join(os.tmpdir(), `qa-outside-${Date.now()}.txt`);
+    writeFileSync(outside, 'qa-secret-must-not-leak');
+    const link = join(root, 'dist', 'qa-evil-link.html');
+    try { rmSync(link, { force: true }); } catch { /* noop */ }
+    try {
+      symlinkSync(outside, link);
+    } catch {
+      rmSync(outside, { force: true });
+      return; // Windows CI without symlink rights — skip, not fail
+    }
+    const port = 18710;
+    const child = spawn('node', ['serve.mjs'], { cwd: root, env: { ...process.env, PORT: String(port) } });
+    await new Promise((r) => setTimeout(r, 900));
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/qa-evil-link.html`);
+      const body = await res.text();
+      assert.equal(res.status, 404, 'symlink escape must 404');
+      assert.ok(!body.includes('qa-secret-must-not-leak'), 'outside content must not leak');
+    } finally {
+      child.kill('SIGTERM');
+      rmSync(link, { force: true });
+      rmSync(outside, { force: true });
+    }
+  });
+
+  it('QA: HEAD on missing file is 404, not 500', async () => {
+    const { spawn } = await import('node:child_process');
+    const port = 18711;
+    const child = spawn('node', ['serve.mjs'], { cwd: root, env: { ...process.env, PORT: String(port) } });
+    await new Promise((r) => setTimeout(r, 900));
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/does-not-exist-qa.html`, { method: 'HEAD' });
+      assert.equal(res.status, 404, 'missing file must 404');
+      assert.match(res.headers.get('cache-control') || '', /no-store/, '404 carries no-store');
+    } finally {
+      child.kill('SIGTERM');
+    }
+  });
+
+  it('QA: traversal /..%2f.. is blocked', async () => {
+    const { spawn } = await import('node:child_process');
+    const port = 18712;
+    const child = spawn('node', ['serve.mjs'], { cwd: root, env: { ...process.env, PORT: String(port) } });
+    await new Promise((r) => setTimeout(r, 900));
+    try {
+      const res = await fetch(`http://127.0.0.1:${port}/..%2f..%2fpackage.json`);
+      assert.equal(res.status, 404, 'traversal must 404');
+    } finally {
+      child.kill('SIGTERM');
     }
   });
 });

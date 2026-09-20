@@ -1,12 +1,13 @@
 /* Tiny zero-dependency static server for local preview: npm run dev */
 import { createServer } from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
-import { join, extname, normalize } from 'node:path';
+import { readFile, stat, realpath } from 'node:fs/promises';
+import { join, extname, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const dist = join(root, 'dist');
-const port = process.env.PORT || 8000;
+const port = Number(process.env.PORT || 8000) || 8000;
+const host = process.env.HOST || '127.0.0.1';
 
 const types = {
   '.html': 'text/html; charset=utf-8',
@@ -21,14 +22,26 @@ const types = {
   '.ico': 'image/x-icon',
 };
 
-createServer(async (req, res) => {
+const distReal = await realpath(dist).catch(() => dist);
+const resolveSafe = async (urlPath) => {
+  let p = decodeURIComponent(new URL(urlPath, 'http://x').pathname);
+  if (p.endsWith('/')) p += 'index.html';
+  const joined = normalize(join(dist, p));
+  const prefix = distReal.endsWith(sep) ? distReal : distReal + sep;
+  // QA-found bug fix: a symlink INSIDE dist/ pointing OUTSIDE must be rejected.
+  // realpath() follows the link, so compare the resolved path, not the lexical one.
+  // (The old code OR-ed the lexical joined path, which let the link through.)
+  const real = await realpath(joined).catch(() => null);
+  if (!real) throw new Error('not-found');
+  if (real !== distReal && !real.startsWith(prefix)) throw new Error('forbidden');
+  return real;
+};
+
+const server = createServer(async (req, res) => {
   const noStore = { 'Cache-Control': 'no-store, no-cache, must-revalidate' };
   if (req.method === 'HEAD') {
     try {
-      let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-      if (path.endsWith('/')) path += 'index.html';
-      const file = normalize(join(dist, path));
-      if (!file.startsWith(dist)) throw new Error('forbidden');
+      const file = await resolveSafe(req.url);
       const s = await stat(file);
       res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream', 'Content-Length': s.size, ...noStore });
       res.end();
@@ -39,10 +52,7 @@ createServer(async (req, res) => {
     return;
   }
   try {
-    let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-    if (path.endsWith('/')) path += 'index.html';
-    const file = normalize(join(dist, path));
-    if (!file.startsWith(dist)) throw new Error('forbidden');
+    const file = await resolveSafe(req.url);
     const body = await readFile(file);
     const s = await stat(file);
     res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream', 'Content-Length': s.size, ...noStore });
@@ -51,4 +61,12 @@ createServer(async (req, res) => {
     res.writeHead(404, { 'Content-Type': 'text/plain', ...noStore });
     res.end('404 — run `npm run build` first?');
   }
-}).listen(port, () => console.log(`Portfolio running at http://localhost:${port}`));
+});
+server.listen(port, host, () => console.log(`Portfolio running at http://${host}:${port}`));
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`✖ port ${port} in use — retry with PORT=8001 npm run dev`);
+    process.exit(1);
+  }
+  throw err;
+});
