@@ -1,7 +1,7 @@
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { readFileSync, writeFileSync, rmSync, readdirSync, symlinkSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, rmSync, readdirSync, symlinkSync, existsSync, mkdtempSync, mkdirSync, copyFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import os from 'node:os';
@@ -446,4 +446,101 @@ describe('build smoke tests', () => {
       run([]); // restore dist/ + meta for whatever runs next
     }
   });
+
+  /* ---------- Reusability: a stranger must go clone → init → build → preview ---------- */
+
+  // A "fresh clone" has no profile.json and none of the author's assets. These tests
+  // copy only what the repo ships (build system + template + starter/) into a temp
+  // dir and run the documented 2-command flow there.
+  const freshClone = () => {
+    const tmp = mkdtempSync(join(os.tmpdir(), 'pm-clone-'));
+    copyFileSync(join(root, 'build.mjs'), join(tmp, 'build.mjs'));
+    copyFileSync(join(root, 'init.mjs'), join(tmp, 'init.mjs'));
+    mkdirSync(join(tmp, 'template'));
+    for (const f of ['template.html', 'styles.css', 'script.js']) {
+      copyFileSync(join(root, 'template', f), join(tmp, 'template', f));
+    }
+    mkdirSync(join(tmp, 'starter'));
+    for (const f of readdirSync(join(root, 'starter'))) {
+      copyFileSync(join(root, 'starter', f), join(tmp, 'starter', f));
+    }
+    return tmp;
+  };
+
+  it('REUSE: clone → init → build → serve works with zero author content', () => {
+    const tmp = freshClone();
+    try {
+      const initOut = execFileSync('node', ['init.mjs', '--root', tmp], { cwd: tmp, encoding: 'utf8' });
+      assert.match(initOut, /wrote profile\.json/, 'init scaffolds a profile');
+      assert.ok(existsSync(join(tmp, 'assets', 'my-cv.pdf')), 'placeholder CV in place');
+      assert.ok(existsSync(join(tmp, 'assets', 'my-photo.png')), 'placeholder photo in place');
+
+      const b = spawnSync('node', ['build.mjs'], { cwd: tmp, encoding: 'utf8' });
+      assert.equal(b.status, 0, `cold-start build must pass without author files; stderr: ${b.stderr}`);
+      assert.match(`${b.stdout}${b.stderr}`, /placeholder marker/, 'build warns the starter content is not theirs yet');
+      const html = readFileSync(join(tmp, 'dist', 'index.html'), 'utf8');
+      assert.match(html, /TODO/, 'starter copy renders in the preview');
+      assert.ok(existsSync(join(tmp, 'dist', 'my-cv.pdf')), 'placeholder CV publishes so the download button works');
+      assert.ok(!existsSync(join(tmp, 'dist', 'Ankush_Kumar_CV.pdf')), 'no author content can leak into dist');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('REUSE: init refuses to clobber an existing profile unless --force/--clean', () => {
+    const tmp = freshClone();
+    try {
+      writeFileSync(join(tmp, 'profile.json'), JSON.stringify({ mine: true }));
+      assert.throws(
+        () => execFileSync('node', ['init.mjs', '--root', tmp], { cwd: tmp, encoding: 'utf8' }),
+        /refusing to overwrite/,
+        'a stranger cloning the author repo gets a clear instruction, not silent data loss'
+      );
+      execFileSync('node', ['init.mjs', '--root', tmp, '--force'], { cwd: tmp, encoding: 'utf8' });
+      assert.ok(JSON.parse(readFileSync(join(tmp, 'profile.json'), 'utf8'))._readme, '--force replaces with the starter');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('REUSE: --clean is the one-command fresh start (replaces profile + purges author assets)', () => {
+    const tmp = freshClone();
+    try {
+      mkdirSync(join(tmp, 'assets'), { recursive: true });
+      writeFileSync(join(tmp, 'profile.json'), JSON.stringify({ author: true }));
+      for (const f of ['Ankush_Kumar_CV.pdf', 'profile.jpg', 'eval-rubric.html']) writeFileSync(join(tmp, 'assets', f), 'author content');
+      execFileSync('node', ['init.mjs', '--root', tmp, '--clean'], { cwd: tmp, encoding: 'utf8' });
+      assert.ok(JSON.parse(readFileSync(join(tmp, 'profile.json'), 'utf8'))._readme, 'profile replaced in the same command');
+      for (const f of ['Ankush_Kumar_CV.pdf', 'profile.jpg', 'eval-rubric.html']) {
+        assert.ok(!existsSync(join(tmp, 'assets', f)), `author asset ${f} must be removed`);
+      }
+      const b = spawnSync('node', ['build.mjs'], { cwd: tmp, encoding: 'utf8' });
+      assert.equal(b.status, 0, 'the cleaned clone still builds');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('REUSE: init supports --root=DIR and rejects bad flags', () => {
+    const tmp = freshClone();
+    try {
+      execFileSync('node', ['init.mjs', `--root=${tmp}`, '--force'], { cwd: tmp, encoding: 'utf8' });
+      assert.ok(existsSync(join(tmp, 'profile.json')), '--root=DIR form must target DIR, not the repo');
+      assert.throws(() => execFileSync('node', ['init.mjs', '--nope'], { cwd: root, encoding: 'utf8' }), /unknown init flag/);
+      assert.throws(() => execFileSync('node', ['init.mjs', '--root'], { cwd: root, encoding: 'utf8' }), /--root needs a directory/);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('REUSE: the author profile.json is a filled-in example, and examples/ never ships', () => {
+    const d = JSON.parse(readFileSync(join(root, 'profile.json'), 'utf8'));
+    assert.ok(d.profile?.name, 'repo default profile is the author real profile (their own site)');
+    assert.ok(!/TODO/.test(JSON.stringify(d)), 'author profile has no starter markers left');
+    // examples/ and profile.json are reference/source only: no JSON may be published.
+    const listed = readdirSync(join(root, 'dist'));
+    const jsonLeaks = listed.filter((f) => f.endsWith('.json'));
+    assert.deepEqual(jsonLeaks, [], `profile JSON must never reach dist/, got: ${jsonLeaks.join(', ')}`);
+  });
+
 });

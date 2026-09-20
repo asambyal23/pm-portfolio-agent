@@ -1,0 +1,96 @@
+{
+  "_readme": "Starter profile for a brand-new portfolio. `npm run init` copies this to profile.json and starter/my-cv.pdf + starter/my-photo.png into assets/. Replace every placeholder with something true about you; the build warns while placeholder markers remain. Full field reference: schema.md. A fully-worked real example: examples/ankush-profile.json.",
+  "site": {
+    "url": "https://your-name.pages.dev",
+    "assetVersion": "1",
+    "initials": "YN",
+    "photo": "my-photo.png",
+    "cv": "my-cv.pdf"
+  },
+  "seo": {
+    "title": "Your Name - Product Manager",
+    "description": "TODO one line: your domain, years of experience, strongest measurable proof.",
+    "ogTitle": "Your Name - Product Manager",
+    "ogDescription": "TODO the same one-liner as description.",
+    "ogImageAlt": "Your Name, Product Manager"
+  },
+  "profile": {
+    "name": "Your Name",
+    "email": "you@example.com",
+    "eyebrow": "Product Manager - TODO your domain",
+    "heroHtml": "TODO one sentence of positioning - what you build and for whom.",
+    "heroLedeHtml": "TODO years of experience + domain + your strongest number, e.g. <strong>5 years</strong> in B2B SaaS.",
+    "heroPrimaryLabel": "See my work",
+    "heroPrimaryHref": "#work",
+    "cvCtaLabel": "Download CV",
+    "role": "Product Manager @ TODO company",
+    "location": "TODO city - Remote/Hybrid",
+    "stats": [
+      { "value": "TODO", "suffix": "", "label": "years in product" },
+      { "value": "TODO", "suffix": "", "label": "your headline metric" },
+      { "value": "TODO", "suffix": "", "label": "another real number" }
+    ],
+    "tags": ["TODO skill", "TODO domain", "TODO tool"]
+  },
+  "nav": [
+    { "id": "experience", "label": "Experience" },
+    { "id": "work", "label": "Case Studies" },
+    { "id": "education", "label": "Education" },
+    { "id": "contact", "label": "Contact" }
+  ],
+  "experience": {
+    "eyebrow": "Where I have worked",
+    "heading": "Experience",
+    "jobs": [
+      {
+        "role": "Product Manager",
+        "company": "TODO company",
+        "industry": "TODO industry",
+        "location": "TODO city",
+        "dates": "2023 - Present",
+        "badge": "TODO headline number",
+        "badgeClass": "pill",
+        "highlight": "TODO one line - the problem you own and the outcome.",
+        "bullets": [
+          "TODO action + measurable outcome, e.g. cut onboarding 21 -> 9 days across 3 releases.",
+          "TODO second outcome. Keep bullets to things you can defend in an interview."
+        ]
+      }
+    ]
+  },
+  "caseStudies": {
+    "eyebrow": "Selected work",
+    "heading": "Case studies",
+    "intro": "TODO one line framing your case studies.",
+    "items": [
+      {
+        "kicker": "TODO company, 2024",
+        "outcome": "TODO the number",
+        "title": "TODO the bet in three words",
+        "details": [
+          { "label": "Problem", "text": "TODO the user/business problem, with the evidence you saw it." },
+          { "label": "Research", "text": "TODO how you sized it - calls, data, shadowing." },
+          { "label": "Solution", "text": "TODO what you shipped and the trade-off you chose." },
+          { "label": "Impact", "text": "TODO the measured result with a number." }
+        ],
+        "tags": ["TODO tag"]
+      }
+    ]
+  },
+  "education": {
+    "eyebrow": "Foundations",
+    "heading": "Education",
+    "degrees": [{ "degree": "TODO degree", "detail": "TODO university, years" }]
+  },
+  "contact": {
+    "eyebrow": "Open to what is next",
+    "heading": "Let us build.",
+    "lede": "TODO the roles you want and where.",
+    "email": "you@example.com",
+    "emailLabel": "Email Me",
+    "linkedin": "https://linkedin.com/in/your-profile",
+    "cvLabel": "CV",
+    "line": "you@example.com - TODO city"
+  },
+  "footer": { "text": "Your Name, Product Manager" }
+}

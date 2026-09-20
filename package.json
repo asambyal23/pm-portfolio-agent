@@ -4,6 +4,7 @@
   "description": "An AI-agent-ready Product Manager portfolio: edit one JSON file (or let an AI agent do it), run one command to build, one more to publish on Cloudflare Pages.",
   "type": "module",
   "scripts": {
+    "init": "node init.mjs",
     "build": "node build.mjs",
     "generate": "node build.mjs",
     "validate": "node build.mjs --dry",

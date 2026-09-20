@@ -45,6 +45,7 @@ Convert raw material into `profile.json` following the schema in [`schema.md`](s
 
 ### 4. Build and verify
 ```bash
+npm run init -- --clean                              # scaffold a fresh profile (only for a new user)
 npm run validate -- --profile path/to/profile.json   # schema + quality check
 npm run build -- --profile path/to/profile.json      # render to dist/
 npm run dev                                          # preview at localhost:8000

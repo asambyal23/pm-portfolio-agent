@@ -21,6 +21,7 @@ One JSON file holds your content. One command builds the site. One more publishe
 A **reusable portfolio template + AI agent skill** for Product Managers:
 
 - **Design** — a fast, dark-themed, recruiter-friendly single page (case studies, experience timeline, PM toolkit with tap-to-open deep-dives, teardowns, builds, education, contact). No framework, no build-time dependencies — hand-rolled CSS/JS.
+- **One-command onboarding** — `npm run init` scaffolds your `profile.json` plus placeholder CV/photo so a fresh clone builds and previews immediately; `--clean` purges the bundled author's content in the same command.
 - **Content/presentation split** — *everything personal lives in one `profile.json`*. The template never contains your data.
 - **AI agent** — [`SKILL.md`](SKILL.md) + 7 task prompts teach any capable AI agent (Claude, ChatGPT, Cursor, …) to convert your raw resume into `profile.json`, write credible outcome-led copy, and **never fabricate a metric**.
 - **Publish** — one **manual** command (`npm run deploy`) puts your site on Cloudflare Pages; `git push` never publishes (see [Deployment](#deployment)). An optional GitHub Actions workflow can automate it (see Deployment → Option C).
@@ -50,22 +51,27 @@ your resume / notes
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/pm-portfolio-agent.git
-cd pm-portfolio-agent
+git clone https://github.com/<you>/pm-portfolio-agent.git my-portfolio
+cd my-portfolio
 
-npm run build     # builds the bundled example (Ankush Kumar) so you can see it working
-npm run dev       # preview at http://localhost:8000
+npm run init -- --clean   # scaffold YOUR profile.json + placeholder CV/photo, remove the bundled author's content
+npm run dev               # preview at http://localhost:8000
 ```
+
+`npm run init` alone is safe (it refuses to overwrite an existing `profile.json`); add `--clean` when you are starting fresh in a clone that already contains someone else's profile and assets. Prefer to see the finished example first? Skip `init` and just run `npm run build && npm run dev`.
+
 Now make it yours:
 
-1. **Create your data file.** Give an AI agent your resume/LinkedIn text along with [`SKILL.md`](SKILL.md) and [`prompts/portfolio-builder.md`](prompts/portfolio-builder.md), or copy the example and edit by hand:
+1. **Replace the two required inputs — your CV and your photo.** Everything else is optional polish:
    ```bash
-   cp examples/ankush-profile.json profile.json
+   cp ~/Downloads/Your_CV.pdf      assets/my-cv.pdf
+   cp ~/Downloads/your-photo.jpg   assets/my-photo.png     # jpg/png both fine
    ```
-2. **Replace your assets:** put your photo at `assets/profile.jpg` and your CV at `assets/Your_CV.pdf`; update `site.photo` / `site.cv` in `profile.json`.
+   Keep `site.cv` / `site.photo` in `profile.json` pointing at whatever filenames you used. The build fails fast (with the exact `cp` command) if either is missing.
+2. **Fill in your story.** Either give an AI agent your resume/LinkedIn text along with [`SKILL.md`](SKILL.md) and [`prompts/portfolio-builder.md`](prompts/portfolio-builder.md), or edit `profile.json` by hand — every starter field is marked `TODO`.
 3. **Check and preview:**
    ```bash
-   npm run validate   # schema + quality checks (flags bullets without numbers, missing impact lines…)
+   npm run validate   # schema + quality checks; warns about leftover TODOs, bullets without numbers, stale contact buttons
    npm run build      # renders dist/ from profile.json
    npm run dev        # http://localhost:8000
    ```
@@ -75,11 +81,23 @@ Now make it yours:
 
 | Command | What it does |
 |---|---|
+| `npm run init` | Scaffold `profile.json` + placeholder CV/photo (refuses to overwrite; `--force` resets, `--clean` also purges the bundled author's content) |
 | `npm run build` | Render `profile.json` → `dist/` |
 | `npm run build -- --profile mydata.json` | Build from a specific profile file |
 | `npm run validate` | Dry-run: schema + quality checks, writes nothing |
 | `npm run dev` | Build + serve `dist/` at `localhost:8000` |
+| `npm test` | Smoke + QA suite (33 tests): template engine, fail-fast paths, deploy gates, cold-start reuse flow |
+| `npm run preflight` | Verify `dist/` was built from the current `profile.json` + assets |
+| `npm run deploy` | Preflight → publish `dist/` to Cloudflare Pages (manual, needs `wrangler login`) |
 | `npm run generate` | Alias of `build` |
+
+## Make it yours (in one line)
+
+```bash
+npm run init -- --clean && npm run dev
+```
+
+That gives you a complete, previewable site with placeholder content before you write a word — then replace the two required inputs (CV + photo), fill the `TODO`s, and the validator keeps you honest until it's ready to publish.
 
 
 ## Using the AI agent

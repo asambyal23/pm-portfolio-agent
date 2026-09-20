@@ -336,6 +336,15 @@ for (const b of ARR('profile.contactButtons')) {
   }
 }
 
+/* Starter-content guard: `npm run init` writes TODO markers on purpose so the
+   design can be previewed before the real copy exists. Shipping them means a
+   live site that says "TODO" to recruiters — warn loudly until they are gone. */
+const placeholderHits = readFileSync(profilePath, 'utf8').match(/TODO|REPLACE ME|example\.com|your-name/gi) || [];
+if (placeholderHits.length) {
+  const kinds = [...new Set(placeholderHits.map((s) => s.toLowerCase()))].sort();
+  warnings.push(`⚠ ${basename(profilePath)} still contains ${placeholderHits.length} placeholder marker(s) (${kinds.join(', ')}) — replace them with your real details before deploying.`);
+}
+
 // Print AFTER every check above: messages pushed later would otherwise be dropped.
 // Dedupe: a field can be validated by both the section pass and inline usage.
 [...new Set(errors)].forEach((e) => console.error(e));
