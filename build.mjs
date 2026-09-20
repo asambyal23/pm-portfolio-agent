@@ -32,6 +32,7 @@ import {
   statSync,
   rmSync,
 } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -255,6 +256,22 @@ if (existsSync(assetsDir)) {
     if (statSync(join(assetsDir, f)).isFile()) copyFileSync(join(assetsDir, f), join(dist, f));
   }
 }
+
+/* Provenance stamp: lets `npm run deploy` refuse a stale dist/ (P0 drift fix). */
+writeFileSync(
+  join(dist, '.build-meta.json'),
+  JSON.stringify(
+    {
+      profile: profilePath.split('/').slice(-1)[0],
+      profileSha256: createHash('sha256').update(readFileSync(profilePath)).digest('hex'),
+      assetVersion: data.site?.assetVersion ?? null,
+      builtAt: new Date().toISOString(),
+      node: process.version,
+    },
+    null,
+    2
+  ) + '\n'
+);
 
 console.log(`✔ Built portfolio from ${profilePath}`);
 console.log(`  → ${join(dist, 'index.html')}  (${(html.length / 1024).toFixed(1)} KB)`);

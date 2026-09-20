@@ -1,0 +1,92 @@
+{
+  "_readme": "Minimal fixture for the build smoke test (npm test): proves optional sections omit cleanly.",
+  "site": {
+    "url": "https://jane-doe.pages.dev",
+    "assetVersion": "1",
+    "initials": "JD",
+    "photo": "profile.jpg",
+    "cv": "Ankush_Kumar_CV.pdf"
+  },
+  "seo": {
+    "title": "Jane Doe - Product Manager, Fintech",
+    "description": "PM, 6 years fintech. Payments, onboarding, experimentation.",
+    "ogTitle": "Jane Doe - Product Manager, Fintech",
+    "ogDescription": "6 years fintech. Payments, onboarding, experimentation.",
+    "ogImageAlt": "Jane Doe, Product Manager"
+  },
+  "profile": {
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "eyebrow": "Product Manager - Fintech - Payments",
+    "heroHtml": "I ship payment products people <em>trust</em>.",
+    "heroLedeHtml": "6 years in fintech across <strong>1.2M users</strong>.",
+    "heroPrimaryLabel": "See my work",
+    "heroPrimaryHref": "#work",
+    "cvCtaLabel": "Download CV",
+    "role": "PM, Payments @ PayLoop",
+    "location": "London, UK - Hybrid",
+    "stats": [
+      { "value": "6", "suffix": "", "label": "years in fintech" },
+      { "value": "1.2", "suffix": "M", "label": "users served" }
+    ],
+    "tags": ["Payments", "Onboarding", "Experimentation"]
+  },
+  "nav": [
+    { "id": "experience", "label": "Experience" },
+    { "id": "work", "label": "Case Studies" },
+    { "id": "education", "label": "Education" },
+    { "id": "contact", "label": "Contact" }
+  ],
+  "experience": {
+    "eyebrow": "Where I have worked",
+    "heading": "Experience",
+    "jobs": [
+      {
+        "role": "Product Manager, Payments",
+        "company": "PayLoop",
+        "industry": "Fintech",
+        "location": "London, UK",
+        "dates": "2021 - Present",
+        "badge": "1.2M users",
+        "badgeClass": "pill",
+        "highlight": "Scaled payments to 1.2M users",
+        "bullets": ["Grew successful payment volume 40% across 1.2M users in 12 months."]
+      }
+    ]
+  },
+  "caseStudies": {
+    "eyebrow": "Selected work",
+    "heading": "Case studies",
+    "intro": "One shipped bet.",
+    "items": [
+      {
+        "kicker": "PayLoop, 2023",
+        "outcome": "+40% success rate",
+        "title": "Retry logic",
+        "details": [
+          { "label": "Problem", "text": "payments failed silently on flaky networks." },
+          { "label": "Research", "text": "funnel analysis across 1.2M users." },
+          { "label": "Solution", "text": "idempotent retries with user-visible status." },
+          { "label": "Impact", "text": "success rate up 40% in 8 weeks." }
+        ],
+        "tags": ["Payments"]
+      }
+    ]
+  },
+  "education": {
+    "eyebrow": "Foundations",
+    "heading": "Education",
+    "degrees": [{ "degree": "B.Sc, Computer Science", "detail": "Example University, 2013 - 2016" }]
+  },
+  "contact": {
+    "eyebrow": "Open to what is next",
+    "heading": "Let us build.",
+    "lede": "PM roles in fintech. London or remote.",
+    "email": "jane@example.com",
+    "emailLabel": "Email Me",
+    "linkedin": "https://linkedin.com/in/jane",
+    "cvLabel": "CV",
+    "line": "jane@example.com - London, remote-friendly"
+  },
+  "footer": { "text": "Jane Doe, Product Manager" }
+}

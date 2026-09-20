@@ -1,9 +1,9 @@
 name: Deploy portfolio to Cloudflare Pages
 
 # (Optional) auto-deploy on push to main. Publishing is manual by design:
-# `npm run build && npx wrangler login && npm run deploy` (README → Deployment
-# → Option A). When the Cloudflare secrets are absent, this workflow still
-# builds the site, then SKIPS the deploy with instructions instead of failing.
+# `npm run build && npm run deploy` (README -> Deployment -> Option A).
+# CLOUDFLARE_PROJECT_NAME env (or repo variable) picks the Pages project.
+# Without Cloudflare secrets the workflow builds + tests, then SKIPS deploy.
 
 on:
   push:
@@ -13,42 +13,62 @@ on:
 permissions:
   contents: read
 
+env:
+  CLOUDFLARE_PROJECT_NAME: ${{ vars.CLOUDFLARE_PROJECT_NAME || 'pm-portfolio' }}
+
 jobs:
-  deploy:
+  build-and-test:
     runs-on: ubuntu-latest
-    env:
-      CF_TOKEN_SET: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
-      CF_ACCOUNT_SET: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4.1.0
         with:
-          node-version: 20
+          node-version: 20.18.1
+
+      - name: Validate portfolio
+        run: npm run validate
+
+      - name: Smoke tests
+        run: npm test
 
       - name: Build portfolio
         run: npm run build
 
-      # Normal path is the manual `npm run deploy` (README → Deployment Option A).
-      # This step only runs when the user opted into auto-deploy (Option C).
+      - name: Upload dist (manual-deploy artifact)
+        uses: actions/upload-artifact@v4.6.0
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    # Optional gate: repo Settings -> Environments -> new env "production"
+    # with Required reviewers, then uncomment the next line:
+    # environment: production
+    env:
+      CF_TOKEN_SET: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+      CF_ACCOUNT_SET: ${{ secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v4.2.0
+        with:
+          name: dist
+          path: dist/
+
       - name: Deploy to Cloudflare Pages
         if: ${{ env.CF_TOKEN_SET == 'true' && env.CF_ACCOUNT_SET == 'true' }}
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v3.2.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME || 'pm-portfolio' }} --branch=main
+          command: pages deploy dist --project-name=${{ env.CLOUDFLARE_PROJECT_NAME }} --branch=main
 
-      - name: Auto-deploy not configured — deploy skipped
+      - name: Auto-deploy not configured - deploy skipped
         if: ${{ env.CF_TOKEN_SET != 'true' || env.CF_ACCOUNT_SET != 'true' }}
         run: |
-          echo "::warning::Cloudflare secrets not set — build OK, auto-deploy SKIPPED. Publishing is manual by design (README → Deployment → Option A):"
-          echo "  npm run build && npx wrangler login && npm run deploy"
-          echo ""
-          echo "For git-push auto-deploy instead (README → Deployment → Option C):"
-          echo "  1. Create a Cloudflare API token ('Edit Cloudflare Workers' template) at dash.cloudflare.com → My Profile → API Tokens"
-          echo "  2. Copy your Cloudflare Account ID from the dashboard sidebar"
-          echo "  3. Repo Settings → Secrets and variables → Actions → add secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID"
-          echo "  4. (Optional) Variable CLOUDFLARE_PROJECT_NAME — your Pages project name; defaults to pm-portfolio"
+          echo "::warning::Cloudflare secrets not set - build OK, auto-deploy SKIPPED. Manual path: npm run build && npm run deploy"

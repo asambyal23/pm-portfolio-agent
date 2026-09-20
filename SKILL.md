@@ -50,6 +50,8 @@ npm run build -- --profile path/to/profile.json      # render to dist/
 npm run dev                                          # preview at localhost:8000
 ```
 - Copy the user's photo to `assets/profile.jpg` and their CV to `assets/<Name>_CV.pdf`; set `site.photo` / `site.cv` to match.
+- `npm test` runs the smoke suite (`test/build.test.mjs`): Jane-minimal validation, optional-section omission, hostile-input escaping, missing-CV fail-fast.
+- `npm run deploy` runs `preflight.mjs` first: refuses a stale `dist/` (profile changed since build) unless `--allow-stale`. Project name comes from `CLOUDFLARE_PROJECT_NAME` env (default `pm-portfolio`) — set it to your Pages project, e.g. `CLOUDFLARE_PROJECT_NAME=ankush-kumar npm run deploy`.
 - Fix all ✖ errors. Report all ⚠ warnings to the user with suggested fixes (they may not have the numbers — that's fine, never invent them).
 
 ### 5. What to ask for (and what not)

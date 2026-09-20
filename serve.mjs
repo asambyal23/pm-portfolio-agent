@@ -22,6 +22,22 @@ const types = {
 };
 
 createServer(async (req, res) => {
+  const noStore = { 'Cache-Control': 'no-store, no-cache, must-revalidate' };
+  if (req.method === 'HEAD') {
+    try {
+      let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+      if (path.endsWith('/')) path += 'index.html';
+      const file = normalize(join(dist, path));
+      if (!file.startsWith(dist)) throw new Error('forbidden');
+      const s = await stat(file);
+      res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream', 'Content-Length': s.size, ...noStore });
+      res.end();
+    } catch {
+      res.writeHead(404, { 'Content-Type': 'text/plain', ...noStore });
+      res.end();
+    }
+    return;
+  }
   try {
     let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (path.endsWith('/')) path += 'index.html';
@@ -29,10 +45,10 @@ createServer(async (req, res) => {
     if (!file.startsWith(dist)) throw new Error('forbidden');
     const body = await readFile(file);
     const s = await stat(file);
-    res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream', 'Content-Length': s.size });
+    res.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream', 'Content-Length': s.size, ...noStore });
     res.end(body);
   } catch {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.writeHead(404, { 'Content-Type': 'text/plain', ...noStore });
     res.end('404 — run `npm run build` first?');
   }
 }).listen(port, () => console.log(`Portfolio running at http://localhost:${port}`));
