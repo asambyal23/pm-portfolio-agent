@@ -521,6 +521,22 @@ describe('build smoke tests', () => {
     }
   });
 
+  it('REUSE: init --clean never prints an empty "cleared" line without a dist/', () => {
+    const tmp = freshClone();
+    try {
+      writeFileSync(join(tmp, 'profile.json'), JSON.stringify({ author: true }));
+      const out = execFileSync('node', ['init.mjs', '--root', tmp, '--clean'], { cwd: tmp, encoding: 'utf8' });
+      assert.doesNotMatch(out, /cleared generated output:\s*$/m, 'no dangling empty cleared message');
+      // With a stale dist/ present, the line must name what it removed.
+      mkdirSync(join(tmp, 'dist'), { recursive: true });
+      writeFileSync(join(tmp, 'dist', 'index.html'), 'stale');
+      const out2 = execFileSync('node', ['init.mjs', '--root', tmp, '--clean', '--force'], { cwd: tmp, encoding: 'utf8' });
+      assert.match(out2, /cleared generated output: dist/, 'names the removed output');
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
   it('REUSE: init supports --root=DIR and rejects bad flags', () => {
     const tmp = freshClone();
     try {

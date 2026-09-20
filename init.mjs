@@ -104,14 +104,15 @@ if (clean) {
 
 // The old dist/ + provenance stamp belong to the previous profile: clear them so
 // nothing stale can be previewed or deployed against your new content.
+const cleared = [];
 for (const f of ['dist', '.build-meta.json']) {
   const p = join(root, f);
   if (existsSync(p)) {
     rmSync(p, { recursive: true, force: true });
-    removals.push(f);
+    cleared.push(f);
   }
 }
-if (removals.length) console.log(`✔ cleared generated output: ${removals.filter((r) => r === 'dist' || r === '.build-meta.json').join(', ')}`);
+if (cleared.length) console.log(`✔ cleared generated output: ${cleared.join(', ')}`);
 
 console.log(`
 Next steps
